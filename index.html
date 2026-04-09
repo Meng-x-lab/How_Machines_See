@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>机器是怎么识别图像的？</title>
+    <link rel="stylesheet" href="./assets/css/common.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&display=swap');
+        body {
+            font-family: 'ZCOOL KuaiLe', 'Comic Sans MS', 'PingFang SC', sans-serif;
+            background-color: #FFFDE7;
+            color: #5D4037;
+            overflow-x: hidden;
+            overscroll-behavior: none;
+        }
+
+        /* 动画体系 */
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+        .animate-float { animation: float 3s ease-in-out infinite; }
+        
+        @keyframes popIn { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        .animate-pop { animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        
+        @keyframes shine { 0% { filter: brightness(1); } 50% { filter: brightness(1.3) drop-shadow(0 0 10px #FFD54F); } 100% { filter: brightness(1); } }
+        .animate-shine { animation: shine 1.5s infinite; }
+
+        @keyframes scanline { 0% { transform: translateY(-100%); } 100% { transform: translateY(100vh); } }
+        .cam-scanline {
+            background: linear-gradient(to bottom, rgba(74,222,128,0), rgba(74,222,128,0.3), rgba(74,222,128,0));
+            animation: scanline 3s linear infinite;
+        }
+
+        /* UI 基础组件 */
+        .cute-card {
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 8px 0 #FFE082, 0 15px 20px rgba(0,0,0,0.05);
+            border: 4px solid #FFE082;
+            position: relative;
+        }
+        
+        /* 交互元素专属 */
+        .drag-item {
+            touch-action: none;
+            cursor: grab;
+            transition: transform 0.1s;
+            z-index: 10;
+        }
+        .drag-item:active { cursor: grabbing; z-index: 50; }
+        .drag-item.dragging { transform: scale(1.1); box-shadow: 0 10px 25px rgba(0,0,0,0.2); transition: none; }
+
+        .scanner-lens {
+            box-shadow: 0 0 0 9999px rgba(0,0,0,0.4), 0 0 15px #4ADE80 inset, 0 0 20px rgba(74, 222, 128, 0.5);
+            border: 4px solid #4ADE80;
+            background: transparent;
+        }
+
+        #scratch-container { position: relative; user-select: none; touch-action: none; }
+        #blur-overlay { transition: opacity 0.3s; }
+        
+        .star-slot { filter: grayscale(100%) opacity(0.3); transition: all 0.5s; }
+        .star-active { filter: grayscale(0%) opacity(1) drop-shadow(0 0 5px gold); transform: scale(1.2); }
+
+        /* 摄像头模块特效 */
+        .control-btn {
+            transition: all 0.2s;
+            border-bottom-width: 4px;
+        }
+        .control-btn:active {
+            transform: translateY(4px);
+            border-bottom-width: 0px;
+        }
+        .control-btn.active-mode {
+            background-color: #FEF08A; /* yellow-200 */
+            border-color: #EAB308; /* yellow-500 */
+            color: #A16207;
+            transform: translateY(4px);
+            border-bottom-width: 0px;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+    </style>
+<style>*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/* ! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.pointer-events-none{pointer-events:none}.fixed{position:fixed}.absolute{position:absolute}.relative{position:relative}.inset-0{inset:0px}.-top-6{top:-1.5rem}.bottom-0{bottom:0px}.bottom-12{bottom:3rem}.left-0{left:0px}.left-1\/2{left:50%}.left-16{left:4rem}.left-20{left:5rem}.left-\[30\%\]{left:30%}.right-10{right:2.5rem}.right-12{right:3rem}.right-4{right:1rem}.top-0{top:0px}.top-10{top:2.5rem}.top-4{top:1rem}.top-8{top:2rem}.top-\[40\%\]{top:40%}.z-0{z-index:0}.z-10{z-index:10}.z-20{z-index:20}.z-30{z-index:30}.z-50{z-index:50}.mx-auto{margin-left:auto;margin-right:auto}.mb-12{margin-bottom:3rem}.mb-2{margin-bottom:0.5rem}.mb-3{margin-bottom:0.75rem}.mb-4{margin-bottom:1rem}.mb-6{margin-bottom:1.5rem}.mb-8{margin-bottom:2rem}.mt-10{margin-top:2.5rem}.mt-2{margin-top:0.5rem}.mt-4{margin-top:1rem}.mt-6{margin-top:1.5rem}.mt-8{margin-top:2rem}.block{display:block}.inline-block{display:inline-block}.flex{display:flex}.hidden{display:none}.aspect-\[4\/3\]{aspect-ratio:4/3}.aspect-video{aspect-ratio:16 / 9}.h-0{height:0px}.h-10{height:2.5rem}.h-12{height:3rem}.h-16{height:4rem}.h-20{height:5rem}.h-24{height:6rem}.h-3{height:0.75rem}.h-4{height:1rem}.h-6{height:1.5rem}.h-64{height:16rem}.h-72{height:18rem}.h-full{height:100%}.min-h-\[200px\]{min-height:200px}.w-10{width:2.5rem}.w-12{width:3rem}.w-16{width:4rem}.w-20{width:5rem}.w-24{width:6rem}.w-3{width:0.75rem}.w-32{width:8rem}.w-64{width:16rem}.w-72{width:18rem}.w-\[20\%\]{width:20%}.w-full{width:100%}.min-w-\[250px\]{min-width:250px}.max-w-2xl{max-width:42rem}.max-w-4xl{max-width:56rem}.max-w-5xl{max-width:64rem}.max-w-6xl{max-width:72rem}.max-w-md{max-width:28rem}.flex-1{flex:1 1 0%}.-translate-x-1\/2{--tw-translate-x:-50%;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.rotate-12{--tw-rotate:12deg;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.transform{transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}@keyframes bounce{0%, 100%{transform:translateY(-25%);animation-timing-function:cubic-bezier(0.8,0,1,1)}50%{transform:none;animation-timing-function:cubic-bezier(0,0,0.2,1)}}.animate-bounce{animation:bounce 1s infinite}@keyframes pulse{50%{opacity:.5}}.animate-pulse{animation:pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite}.cursor-crosshair{cursor:crosshair}.cursor-grab{cursor:grab}.cursor-move{cursor:move}.cursor-pointer{cursor:pointer}.touch-none{touch-action:none}.select-none{-webkit-user-select:none;user-select:none}.appearance-none{-webkit-appearance:none;appearance:none}.flex-col{flex-direction:column}.flex-wrap{flex-wrap:wrap}.items-start{align-items:flex-start}.items-center{align-items:center}.justify-end{justify-content:flex-end}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.gap-1{gap:0.25rem}.gap-2{gap:0.5rem}.gap-3{gap:0.75rem}.gap-4{gap:1rem}.gap-6{gap:1.5rem}.gap-8{gap:2rem}.space-y-16 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(4rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(4rem * var(--tw-space-y-reverse))}.overflow-hidden{overflow:hidden}.rounded-2xl{border-radius:1rem}.rounded-3xl{border-radius:1.5rem}.rounded-full{border-radius:9999px}.rounded-lg{border-radius:0.5rem}.rounded-xl{border-radius:0.75rem}.border-2{border-width:2px}.border-4{border-width:4px}.border-8{border-width:8px}.border-b{border-bottom-width:1px}.border-b-2{border-bottom-width:2px}.border-b-4{border-bottom-width:4px}.border-dashed{border-style:dashed}.border-blue-200{--tw-border-opacity:1;border-color:rgb(191 219 254 / var(--tw-border-opacity, 1))}.border-blue-500\/50{border-color:rgb(59 130 246 / 0.5)}.border-blue-600{--tw-border-opacity:1;border-color:rgb(37 99 235 / var(--tw-border-opacity, 1))}.border-blue-700{--tw-border-opacity:1;border-color:rgb(29 78 216 / var(--tw-border-opacity, 1))}.border-gray-200{--tw-border-opacity:1;border-color:rgb(229 231 235 / var(--tw-border-opacity, 1))}.border-gray-300{--tw-border-opacity:1;border-color:rgb(209 213 219 / var(--tw-border-opacity, 1))}.border-gray-400{--tw-border-opacity:1;border-color:rgb(156 163 175 / var(--tw-border-opacity, 1))}.border-gray-600{--tw-border-opacity:1;border-color:rgb(75 85 99 / var(--tw-border-opacity, 1))}.border-gray-700{--tw-border-opacity:1;border-color:rgb(55 65 81 / var(--tw-border-opacity, 1))}.border-green-400{--tw-border-opacity:1;border-color:rgb(74 222 128 / var(--tw-border-opacity, 1))}.border-orange-300{--tw-border-opacity:1;border-color:rgb(253 186 116 / var(--tw-border-opacity, 1))}.border-orange-400{--tw-border-opacity:1;border-color:rgb(251 146 60 / var(--tw-border-opacity, 1))}.border-pink-200{--tw-border-opacity:1;border-color:rgb(251 207 232 / var(--tw-border-opacity, 1))}.border-pink-300{--tw-border-opacity:1;border-color:rgb(249 168 212 / var(--tw-border-opacity, 1))}.border-red-600{--tw-border-opacity:1;border-color:rgb(220 38 38 / var(--tw-border-opacity, 1))}.border-yellow-200{--tw-border-opacity:1;border-color:rgb(254 240 138 / var(--tw-border-opacity, 1))}.border-yellow-300{--tw-border-opacity:1;border-color:rgb(253 224 71 / var(--tw-border-opacity, 1))}.border-yellow-400{--tw-border-opacity:1;border-color:rgb(250 204 21 / var(--tw-border-opacity, 1))}.bg-black{--tw-bg-opacity:1;background-color:rgb(0 0 0 / var(--tw-bg-opacity, 1))}.bg-blue-200{--tw-bg-opacity:1;background-color:rgb(191 219 254 / var(--tw-bg-opacity, 1))}.bg-blue-400{--tw-bg-opacity:1;background-color:rgb(96 165 250 / var(--tw-bg-opacity, 1))}.bg-blue-50{--tw-bg-opacity:1;background-color:rgb(239 246 255 / var(--tw-bg-opacity, 1))}.bg-blue-500{--tw-bg-opacity:1;background-color:rgb(59 130 246 / var(--tw-bg-opacity, 1))}.bg-blue-900\/50{background-color:rgb(30 58 138 / 0.5)}.bg-gray-100{--tw-bg-opacity:1;background-color:rgb(243 244 246 / var(--tw-bg-opacity, 1))}.bg-gray-200{--tw-bg-opacity:1;background-color:rgb(229 231 235 / var(--tw-bg-opacity, 1))}.bg-gray-50{--tw-bg-opacity:1;background-color:rgb(249 250 251 / var(--tw-bg-opacity, 1))}.bg-gray-700{--tw-bg-opacity:1;background-color:rgb(55 65 81 / var(--tw-bg-opacity, 1))}.bg-gray-700\/50{background-color:rgb(55 65 81 / 0.5)}.bg-gray-800{--tw-bg-opacity:1;background-color:rgb(31 41 55 / var(--tw-bg-opacity, 1))}.bg-gray-900\/40{background-color:rgb(17 24 39 / 0.4)}.bg-gray-900\/80{background-color:rgb(17 24 39 / 0.8)}.bg-green-200{--tw-bg-opacity:1;background-color:rgb(187 247 208 / var(--tw-bg-opacity, 1))}.bg-green-50{--tw-bg-opacity:1;background-color:rgb(240 253 244 / var(--tw-bg-opacity, 1))}.bg-green-500{--tw-bg-opacity:1;background-color:rgb(34 197 94 / var(--tw-bg-opacity, 1))}.bg-orange-100{--tw-bg-opacity:1;background-color:rgb(255 237 213 / var(--tw-bg-opacity, 1))}.bg-orange-50{--tw-bg-opacity:1;background-color:rgb(255 247 237 / var(--tw-bg-opacity, 1))}.bg-orange-500{--tw-bg-opacity:1;background-color:rgb(249 115 22 / var(--tw-bg-opacity, 1))}.bg-pink-200{--tw-bg-opacity:1;background-color:rgb(251 207 232 / var(--tw-bg-opacity, 1))}.bg-pink-300{--tw-bg-opacity:1;background-color:rgb(249 168 212 / var(--tw-bg-opacity, 1))}.bg-pink-50{--tw-bg-opacity:1;background-color:rgb(253 242 248 / var(--tw-bg-opacity, 1))}.bg-purple-200{--tw-bg-opacity:1;background-color:rgb(233 213 255 / var(--tw-bg-opacity, 1))}.bg-red-400{--tw-bg-opacity:1;background-color:rgb(248 113 113 / var(--tw-bg-opacity, 1))}.bg-red-500{--tw-bg-opacity:1;background-color:rgb(239 68 68 / var(--tw-bg-opacity, 1))}.bg-white{--tw-bg-opacity:1;background-color:rgb(255 255 255 / var(--tw-bg-opacity, 1))}.bg-white\/50{background-color:rgb(255 255 255 / 0.5)}.bg-white\/90{background-color:rgb(255 255 255 / 0.9)}.bg-white\/95{background-color:rgb(255 255 255 / 0.95)}.bg-yellow-100{--tw-bg-opacity:1;background-color:rgb(254 249 195 / var(--tw-bg-opacity, 1))}.bg-yellow-200{--tw-bg-opacity:1;background-color:rgb(254 240 138 / var(--tw-bg-opacity, 1))}.bg-yellow-400{--tw-bg-opacity:1;background-color:rgb(250 204 21 / var(--tw-bg-opacity, 1))}.bg-yellow-500{--tw-bg-opacity:1;background-color:rgb(234 179 8 / var(--tw-bg-opacity, 1))}.bg-gradient-to-b{background-image:linear-gradient(to bottom, var(--tw-gradient-stops))}.bg-gradient-to-br{background-image:linear-gradient(to bottom right, var(--tw-gradient-stops))}.from-gray-800{--tw-gradient-from:#1f2937 var(--tw-gradient-from-position);--tw-gradient-to:rgb(31 41 55 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.from-yellow-50{--tw-gradient-from:#fefce8 var(--tw-gradient-from-position);--tw-gradient-to:rgb(254 252 232 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.to-gray-900{--tw-gradient-to:#111827 var(--tw-gradient-to-position)}.to-orange-100{--tw-gradient-to:#ffedd5 var(--tw-gradient-to-position)}.object-contain{object-fit:contain}.object-cover{object-fit:cover}.p-3{padding:0.75rem}.p-4{padding:1rem}.p-6{padding:1.5rem}.px-2{padding-left:0.5rem;padding-right:0.5rem}.px-4{padding-left:1rem;padding-right:1rem}.px-6{padding-left:1.5rem;padding-right:1.5rem}.px-8{padding-left:2rem;padding-right:2rem}.py-12{padding-top:3rem;padding-bottom:3rem}.py-2{padding-top:0.5rem;padding-bottom:0.5rem}.py-3{padding-top:0.75rem;padding-bottom:0.75rem}.py-8{padding-top:2rem;padding-bottom:2rem}.pb-12{padding-bottom:3rem}.pb-2{padding-bottom:0.5rem}.pb-20{padding-bottom:5rem}.pt-28{padding-top:7rem}.text-center{text-align:center}.text-2xl{font-size:1.5rem;line-height:2rem}.text-3xl{font-size:1.875rem;line-height:2.25rem}.text-4xl{font-size:2.25rem;line-height:2.5rem}.text-5xl{font-size:3rem;line-height:1}.text-6xl{font-size:3.75rem;line-height:1}.text-8xl{font-size:6rem;line-height:1}.text-9xl{font-size:8rem;line-height:1}.text-\[10rem\]{font-size:10rem}.text-\[8rem\]{font-size:8rem}.text-lg{font-size:1.125rem;line-height:1.75rem}.text-sm{font-size:0.875rem;line-height:1.25rem}.text-xl{font-size:1.25rem;line-height:1.75rem}.text-xs{font-size:0.75rem;line-height:1rem}.font-bold{font-weight:700}.font-normal{font-weight:400}.leading-relaxed{line-height:1.625}.tracking-widest{letter-spacing:0.1em}.text-blue-200{--tw-text-opacity:1;color:rgb(191 219 254 / var(--tw-text-opacity, 1))}.text-blue-300{--tw-text-opacity:1;color:rgb(147 197 253 / var(--tw-text-opacity, 1))}.text-blue-500{--tw-text-opacity:1;color:rgb(59 130 246 / var(--tw-text-opacity, 1))}.text-blue-600{--tw-text-opacity:1;color:rgb(37 99 235 / var(--tw-text-opacity, 1))}.text-blue-700{--tw-text-opacity:1;color:rgb(29 78 216 / var(--tw-text-opacity, 1))}.text-gray-300{--tw-text-opacity:1;color:rgb(209 213 219 / var(--tw-text-opacity, 1))}.text-gray-400{--tw-text-opacity:1;color:rgb(156 163 175 / var(--tw-text-opacity, 1))}.text-gray-500{--tw-text-opacity:1;color:rgb(107 114 128 / var(--tw-text-opacity, 1))}.text-gray-600{--tw-text-opacity:1;color:rgb(75 85 99 / var(--tw-text-opacity, 1))}.text-gray-700{--tw-text-opacity:1;color:rgb(55 65 81 / var(--tw-text-opacity, 1))}.text-green-600{--tw-text-opacity:1;color:rgb(22 163 74 / var(--tw-text-opacity, 1))}.text-green-700{--tw-text-opacity:1;color:rgb(21 128 61 / var(--tw-text-opacity, 1))}.text-orange-300{--tw-text-opacity:1;color:rgb(253 186 116 / var(--tw-text-opacity, 1))}.text-orange-500{--tw-text-opacity:1;color:rgb(249 115 22 / var(--tw-text-opacity, 1))}.text-orange-600{--tw-text-opacity:1;color:rgb(234 88 12 / var(--tw-text-opacity, 1))}.text-pink-600{--tw-text-opacity:1;color:rgb(219 39 119 / var(--tw-text-opacity, 1))}.text-pink-700{--tw-text-opacity:1;color:rgb(190 24 93 / var(--tw-text-opacity, 1))}.text-purple-600{--tw-text-opacity:1;color:rgb(147 51 234 / var(--tw-text-opacity, 1))}.text-purple-700{--tw-text-opacity:1;color:rgb(126 34 206 / var(--tw-text-opacity, 1))}.text-red-500{--tw-text-opacity:1;color:rgb(239 68 68 / var(--tw-text-opacity, 1))}.text-red-600{--tw-text-opacity:1;color:rgb(220 38 38 / var(--tw-text-opacity, 1))}.text-white{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.opacity-30{opacity:0.3}.opacity-50{opacity:0.5}.mix-blend-difference{mix-blend-mode:difference}.shadow{--tw-shadow:0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 1px 3px 0 var(--tw-shadow-color), 0 1px 2px -1px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-2xl{--tw-shadow:0 25px 50px -12px rgb(0 0 0 / 0.25);--tw-shadow-colored:0 25px 50px -12px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-\[0_0_30px_rgba\(0\2c 0\2c 0\2c 0\.8\)_inset\]{--tw-shadow:0 0 30px rgba(0,0,0,0.8) inset;--tw-shadow-colored:inset 0 0 30px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-inner{--tw-shadow:inset 0 2px 4px 0 rgb(0 0 0 / 0.05);--tw-shadow-colored:inset 0 2px 4px 0 var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-lg{--tw-shadow:0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 10px 15px -3px var(--tw-shadow-color), 0 4px 6px -4px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-md{--tw-shadow:0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 4px 6px -1px var(--tw-shadow-color), 0 2px 4px -2px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-sm{--tw-shadow:0 1px 2px 0 rgb(0 0 0 / 0.05);--tw-shadow-colored:0 1px 2px 0 var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-xl{--tw-shadow:0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 20px 25px -5px var(--tw-shadow-color), 0 8px 10px -6px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.blur-\[15px\]{--tw-blur:blur(15px);filter:var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)}.drop-shadow-\[0_0_10px_rgba\(147\2c 197\2c 253\2c 0\.5\)\]{--tw-drop-shadow:drop-shadow(0 0 10px rgba(147,197,253,0.5));filter:var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)}.drop-shadow-md{--tw-drop-shadow:drop-shadow(0 4px 3px rgb(0 0 0 / 0.07)) drop-shadow(0 2px 2px rgb(0 0 0 / 0.06));filter:var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)}.grayscale{--tw-grayscale:grayscale(100%);filter:var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)}.filter{filter:var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)}.backdrop-blur-\[12px\]{--tw-backdrop-blur:blur(12px);-webkit-backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia)}.backdrop-blur-md{--tw-backdrop-blur:blur(12px);-webkit-backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia)}.backdrop-blur-sm{--tw-backdrop-blur:blur(4px);-webkit-backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia)}.transition-all{transition-property:all;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.transition-opacity{transition-property:opacity;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.duration-300{transition-duration:300ms}.duration-500{transition-duration:500ms}.ease-out{transition-timing-function:cubic-bezier(0, 0, 0.2, 1)}.hover\:bg-blue-300:hover{--tw-bg-opacity:1;background-color:rgb(147 197 253 / var(--tw-bg-opacity, 1))}.hover\:bg-blue-400:hover{--tw-bg-opacity:1;background-color:rgb(96 165 250 / var(--tw-bg-opacity, 1))}.active\:translate-y-1:active{--tw-translate-y:0.25rem;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.active\:border-b-0:active{border-bottom-width:0px}@media (min-width: 768px){.md\:flex{display:flex}.md\:w-64{width:16rem}.md\:flex-row{flex-direction:row}.md\:flex-col{flex-direction:column}.md\:items-start{align-items:flex-start}.md\:gap-2{gap:0.5rem}.md\:p-10{padding:2.5rem}.md\:text-2xl{font-size:1.5rem;line-height:2rem}.md\:text-6xl{font-size:3.75rem;line-height:1}}</style></head>
+<body class="site-page site-page--home relative pb-20">
+
+    <!-- 顶部导航栏 & 全局进度 -->
+    <nav class="fixed top-0 w-full bg-white/90 backdrop-blur-md z-50 shadow-sm border-b-4 border-yellow-200">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="text-xl md:text-2xl font-bold text-orange-500 flex items-center gap-2">
+                🤖 <span>机器识图乐园</span>
+            </div>
+            <div class="flex items-center gap-1 md:gap-2 text-xl md:text-2xl" id="global-stars">
+                <!-- 增加到 7 颗星，最后一颗留给彩蛋 -->
+                <span class="star-slot" id="star-1">⭐</span>
+                <span class="star-slot" id="star-2">⭐</span>
+                <span class="star-slot" id="star-3">⭐</span>
+                <span class="star-slot" id="star-4">⭐</span>
+                <span class="star-slot" id="star-5">⭐</span>
+                <span class="star-slot" id="star-6">⭐</span>
+                <span class="star-slot" id="star-7">🌟</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 1. 首屏欢迎区 -->
+    <section id="hero" class="pt-28 pb-12 px-4 max-w-5xl mx-auto text-center flex flex-col items-center">
+        <div class="text-8xl mb-4 animate-float">🤖</div>
+        <h1 class="text-4xl md:text-6xl font-bold text-orange-500 mb-4 drop-shadow-md">机器是怎么识别图像的？</h1>
+        <p class="text-lg md:text-2xl text-brown-600 mb-8 max-w-2xl leading-relaxed">
+            观看动画视频，动手完成闯关，<br>体验机器眼里的神奇世界！🔎
+        </p>
+        <a href="#video-section" class="bg-blue-400 text-white border-b-4 border-blue-600 rounded-full px-8 py-3 text-xl font-bold active:translate-y-1 active:border-b-0 transition-all hover:bg-blue-300">
+            📺 先看视频，再闯关！
+        </a>
+    </section>
+
+    <!-- 2. 科普视频区 -->
+    <section id="video-section" class="py-12 px-4 bg-orange-50 relative">
+        <div class="max-w-4xl mx-auto">
+            <div class="relative w-full aspect-video cute-card overflow-hidden bg-black border-8 border-orange-300 shadow-2xl">
+    <video class="w-full h-full object-contain bg-black" controls="" preload="metadata">
+        <source src="./assets/media/intro-video.mp4" type="video/mp4">
+        你的浏览器暂时不支持 video 标签。
+    </video>
+</div>
+            <div class="text-center mt-10 text-2xl font-bold text-orange-500 animate-bounce">
+                ⬇️ 看懂了吗？一起来动手操作吧！ ⬇️
+            </div>
+        </div>
+    </section>
+
+    <!-- 3. 互动乐园 -->
+    <section id="games-section" class="py-12 px-4 max-w-5xl mx-auto space-y-16">
+
+        <!-- 游戏 1：拖拽分拣 -->
+        <div class="cute-card p-6 md:p-10 relative overflow-hidden" id="game1-container">
+            <div class="flex items-center gap-4 mb-6">
+                <div class="text-4xl bg-orange-100 w-16 h-16 rounded-full flex items-center justify-center font-bold text-orange-600">1</div>
+                <h3 class="text-2xl font-bold">机器第一眼看到了什么？</h3>
+            </div>
+            <p class="text-lg text-gray-600 mb-6">请把机器能“看懂”的线索拖进机器人的眼睛里，它看不懂的拖到垃圾桶！</p>
+            
+            <div class="flex flex-col md:flex-row gap-8">
+                <div class="flex-1 flex flex-wrap gap-4 items-start" id="g1-items">
+                    <div class="drag-item bg-white border-4 border-blue-200 rounded-xl p-3 font-bold shadow-sm" data-type="good">🟩 小方块和颜色</div>
+                    <div class="drag-item bg-white border-4 border-blue-200 rounded-xl p-3 font-bold shadow-sm" data-type="bad">🗣️ 它的名字</div>
+                    <div class="drag-item bg-white border-4 border-blue-200 rounded-xl p-3 font-bold shadow-sm" data-type="good">〰️ 边缘和线条</div>
+                    <div class="drag-item bg-white border-4 border-blue-200 rounded-xl p-3 font-bold shadow-sm" data-type="bad">📖 它的故事</div>
+                </div>
+                <div class="flex-1 flex gap-4">
+                    <div class="flex-1 border-4 border-dashed border-green-400 rounded-3xl p-4 flex flex-col items-center justify-center bg-green-50 min-h-[200px]" id="g1-bot-eye">
+                        <div class="text-6xl mb-2" id="g1-bot-face">🤖</div>
+                        <div class="text-green-600 font-bold">拖到机器眼里</div>
+                    </div>
+                    <div class="flex-1 border-4 border-dashed border-gray-400 rounded-3xl p-4 flex flex-col items-center justify-center bg-gray-100 min-h-[200px]" id="g1-trash">
+                        <div class="text-6xl mb-2">🗑️</div>
+                        <div class="text-gray-500 font-bold">机器看不懂</div>
+                    </div>
+                </div>
+            </div>
+            <div id="g1-feedback" class="absolute inset-0 bg-white/90 hidden flex-col items-center justify-center z-20 backdrop-blur-sm rounded-2xl">
+                <div class="text-6xl mb-4">🌟</div>
+                <h2 class="text-3xl font-bold text-orange-500">太棒啦！</h2>
+                <p class="text-xl mt-2">机器不知道名字和故事，它一开始只认识颜色和形状！</p>
+            </div>
+        </div>
+
+        <!-- 游戏 2：滑动+拼补 -->
+        <div class="cute-card p-6 md:p-10 bg-blue-50 relative">
+            <div class="flex items-center gap-4 mb-6">
+                <div class="text-4xl bg-blue-200 w-16 h-16 rounded-full flex items-center justify-center font-bold text-blue-700">2</div>
+                <h3 class="text-2xl font-bold">擦亮像素世界，修补漏洞</h3>
+            </div>
+            <p class="text-lg text-gray-600 mb-6">先滑动滑块让图片变清晰，然后找出掉落的那一块小像素拼上去！</p>
+            
+            <div class="flex flex-col md:flex-row gap-8 items-center justify-center">
+                <div class="relative w-64 h-64 bg-white rounded-3xl border-4 border-blue-200 overflow-hidden flex items-center justify-center" id="g2-canvas">
+                    <div id="g2-img" class="text-9xl transition-all duration-300 filter blur-[15px] select-none">🍎</div>
+                    <div id="g2-hole" class="absolute top-8 right-12 w-16 h-16 bg-white border-2 border-dashed border-gray-300 hidden"></div>
+                </div>
+                <div class="flex flex-col items-center gap-6">
+                    <input type="range" id="g2-slider" min="0" max="15" value="15" class="w-64 h-4 bg-blue-200 rounded-lg appearance-none cursor-pointer" oninput="game2Slide(this.value)">
+                    <div class="text-sm font-bold text-blue-500">向左滑动变清晰 ⬅️</div>
+                    <div id="g2-piece-container" class="h-20 w-20 flex items-center justify-center hidden">
+                        <div id="g2-piece" class="drag-item w-16 h-16 bg-red-500 rounded-lg border-2 border-red-600 shadow-md flex items-center justify-center text-white text-xs font-bold">碎片</div>
+                    </div>
+                </div>
+            </div>
+             <div id="g2-feedback" class="absolute inset-0 bg-white/90 hidden flex-col items-center justify-center z-20 backdrop-blur-sm rounded-2xl">
+                <div class="text-6xl mb-4">🧩</div>
+                <h2 class="text-3xl font-bold text-blue-600">拼图完成！</h2>
+                <p class="text-xl mt-2">图片就是由这样一个个小小的“像素块”拼起来的！</p>
+            </div>
+        </div>
+
+        <!-- 游戏 3：真实扫描探测 -->
+        <div class="cute-card p-6 md:p-10 relative">
+            <div class="flex items-center gap-4 mb-6">
+                <div class="text-4xl bg-green-200 w-16 h-16 rounded-full flex items-center justify-center font-bold text-green-700">3</div>
+                <h3 class="text-2xl font-bold">拿好扫描仪，找线索！</h3>
+            </div>
+            <p class="text-lg text-gray-600 mb-6">按住扫描仪（放大镜）在图片上慢慢滑动，帮机器收集 3 个关键线索。</p>
+            
+            <div class="flex flex-col md:flex-row gap-8 items-center">
+                <div class="relative w-72 h-72 bg-yellow-100 rounded-3xl border-4 border-yellow-300 overflow-hidden select-none" id="g3-board">
+                    <div class="absolute inset-0 flex items-center justify-center text-[10rem]">🐱</div>
+                    <div class="absolute top-10 left-16 w-16 h-16 rounded-full" id="hot-ear" data-clue="ear"></div>
+                    <div class="absolute top-[40%] left-[30%] w-24 h-16 rounded-full" id="hot-eye" data-clue="eye"></div>
+                    <div class="absolute bottom-12 left-20 w-32 h-16 rounded-full" id="hot-whisker" data-clue="whisker"></div>
+                    <div id="g3-scanner" class="absolute top-0 left-0 w-24 h-24 rounded-full scanner-lens flex items-center justify-center cursor-move touch-none z-10">
+                        <span class="text-3xl opacity-50 relative z-20 mix-blend-difference text-white">➕</span>
+                    </div>
+                </div>
+                <div class="flex-1 bg-gray-50 rounded-2xl p-6 border-4 border-gray-200 min-w-[250px]">
+                    <h4 class="text-xl font-bold mb-4 border-b-2 pb-2">已发现的线索：</h4>
+                    <div class="flex flex-col gap-4">
+                        <div class="flex items-center gap-3 opacity-30 grayscale transition-all duration-500" id="clue-ear">
+                            <div class="w-10 h-10 bg-pink-200 rounded-full flex items-center justify-center text-xl">🔺</div>
+                            <span class="font-bold">尖尖边缘 (耳朵)</span>
+                        </div>
+                        <div class="flex items-center gap-3 opacity-30 grayscale transition-all duration-500" id="clue-eye">
+                            <div class="w-10 h-10 bg-blue-200 rounded-full flex items-center justify-center text-xl">🔵</div>
+                            <span class="font-bold">圆形轮廓 (眼睛)</span>
+                        </div>
+                        <div class="flex items-center gap-3 opacity-30 grayscale transition-all duration-500" id="clue-whisker">
+                            <div class="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center text-xl">〰️</div>
+                            <span class="font-bold">细长线条 (胡须)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+             <div id="g3-feedback" class="absolute inset-0 bg-white/90 hidden flex-col items-center justify-center z-20 backdrop-blur-sm rounded-2xl">
+                <div class="text-6xl mb-4">🔍</div>
+                <h2 class="text-3xl font-bold text-green-600">收集完毕！</h2>
+                <p class="text-xl mt-2">机器就像侦探，通过扫描这些局部的特征线索来做判断。</p>
+            </div>
+        </div>
+
+        <!-- 游戏 4：拖拽组装 -->
+        <div class="cute-card p-6 md:p-10 bg-pink-50 relative">
+            <div class="flex items-center gap-4 mb-6">
+                <div class="text-4xl bg-pink-200 w-16 h-16 rounded-full flex items-center justify-center font-bold text-pink-700">4</div>
+                <h3 class="text-2xl font-bold">合成线索，猜出答案！</h3>
+            </div>
+            <p class="text-lg text-gray-600 mb-6">把刚才收集到的线索，全部拖进“机器大脑”里，看看它能猜出什么！</p>
+            
+            <div class="flex flex-col md:flex-row gap-8 items-center justify-center">
+                <div class="flex md:flex-col gap-4" id="g4-pieces">
+                    <div class="drag-item bg-white p-3 rounded-xl border-2 border-pink-300 shadow flex items-center gap-2 font-bold"><span class="text-2xl">🔺</span> 尖边缘</div>
+                    <div class="drag-item bg-white p-3 rounded-xl border-2 border-pink-300 shadow flex items-center gap-2 font-bold"><span class="text-2xl">🔵</span> 圆轮廓</div>
+                    <div class="drag-item bg-white p-3 rounded-xl border-2 border-pink-300 shadow flex items-center gap-2 font-bold"><span class="text-2xl">〰️</span> 细线条</div>
+                </div>
+                <div class="relative w-64 h-64 bg-white rounded-full border-8 border-gray-200 shadow-inner flex flex-col items-center justify-center overflow-hidden" id="g4-brain">
+                    <div class="absolute bottom-0 left-0 w-full bg-pink-300 h-0 transition-all duration-500 ease-out z-0" id="g4-progress"></div>
+                    <div class="relative z-10 text-center">
+                        <div class="text-5xl mb-2" id="g4-result-icon">🧠</div>
+                        <div class="font-bold text-gray-500" id="g4-result-text">等待线索...</div>
+                    </div>
+                </div>
+            </div>
+            <div id="g4-feedback" class="absolute inset-0 bg-white/90 hidden flex-col items-center justify-center z-20 backdrop-blur-sm rounded-2xl">
+                <div class="text-[8rem] animate-bounce">🐱</div>
+                <h2 class="text-3xl font-bold text-pink-600 bg-white px-6 py-2 rounded-full shadow-lg border-2 border-pink-200 mt-4">合成完毕！是一只小猫！</h2>
+            </div>
+        </div>
+
+        <!-- 游戏 5：擦除修复 -->
+        <div class="cute-card p-6 md:p-10 relative">
+            <div class="flex items-center gap-4 mb-6">
+                <div class="text-4xl bg-purple-200 w-16 h-16 rounded-full flex items-center justify-center font-bold text-purple-700">5</div>
+                <h3 class="text-2xl font-bold">帮机器修图</h3>
+            </div>
+            <p class="text-lg text-gray-600 mb-6">哎呀，这张图太模糊了机器认错啦！请按住“小刷子”在图片上快速摩擦，把它擦干净！</p>
+            
+            <div class="flex flex-col items-center">
+                <div id="scratch-container" class="relative w-64 h-64 rounded-3xl overflow-hidden border-4 border-gray-300 cursor-crosshair">
+                    <div class="absolute inset-0 flex items-center justify-center text-9xl bg-white">🐶</div>
+                    <div id="blur-overlay" class="absolute inset-0 bg-gray-900/40 backdrop-blur-[12px] flex items-center justify-center z-10">
+                        <div class="text-white text-xl font-bold opacity-50">太模糊啦...</div>
+                    </div>
+                    <div id="g5-brush" class="absolute w-12 h-12 text-3xl pointer-events-none z-20 hidden" style="transform: translate(-50%, -50%); display: none;">🧽</div>
+                </div>
+                <div class="mt-8 w-full max-w-md bg-gray-200 rounded-full h-6 overflow-hidden">
+                    <div id="g5-confidence" class="bg-red-400 h-full w-[20%] transition-all duration-300 flex items-center justify-end px-2 text-xs font-bold text-white">置信度 20%</div>
+                </div>
+            </div>
+            <div id="g5-feedback" class="absolute inset-0 bg-white/90 hidden flex-col items-center justify-center z-30 backdrop-blur-sm rounded-2xl">
+                <div class="text-6xl mb-4">✨</div>
+                <h2 class="text-3xl font-bold text-purple-600">图片清晰了！</h2>
+                <p class="text-xl mt-2">当图片变得清晰，机器能找到更多线索，就不容易认错啦！</p>
+            </div>
+        </div>
+
+        <!-- 游戏 6：排序流水线 -->
+        <div class="cute-card p-6 md:p-10 bg-gradient-to-br from-yellow-50 to-orange-100 relative">
+            <div class="absolute -top-6 left-1/2 transform -translate-x-1/2 bg-orange-500 text-white px-8 py-2 rounded-full font-bold shadow-lg text-xl">
+                🏆 第6关：识图流水线
+            </div>
+            <p class="text-lg text-gray-700 mt-6 mb-8 text-center font-bold">请把机器识别图像的 4 个步骤，按正确的先后顺序拖到流水线上！</p>
+            
+            <div class="flex flex-col md:flex-row justify-between gap-4 mb-12 relative z-10" id="g6-slots">
+                <div class="flex-1 h-24 border-4 border-dashed border-orange-300 rounded-xl bg-white/50 flex flex-col items-center justify-center" data-step="1">第1步</div>
+                <div class="hidden md:flex items-center text-orange-300 text-3xl font-bold">➔</div>
+                <div class="flex-1 h-24 border-4 border-dashed border-orange-300 rounded-xl bg-white/50 flex flex-col items-center justify-center" data-step="2">第2步</div>
+                <div class="hidden md:flex items-center text-orange-300 text-3xl font-bold">➔</div>
+                <div class="flex-1 h-24 border-4 border-dashed border-orange-300 rounded-xl bg-white/50 flex flex-col items-center justify-center" data-step="3">第3步</div>
+                <div class="hidden md:flex items-center text-orange-300 text-3xl font-bold">➔</div>
+                <div class="flex-1 h-24 border-4 border-dashed border-orange-300 rounded-xl bg-white/50 flex flex-col items-center justify-center" data-step="4">最后</div>
+            </div>
+            
+            <div class="flex flex-wrap justify-center gap-4" id="g6-blocks">
+                <div class="drag-item bg-white border-2 border-orange-400 p-4 rounded-xl shadow-md font-bold cursor-grab" data-correct="3">🧩 拼凑特征线索</div>
+                <div class="drag-item bg-white border-2 border-orange-400 p-4 rounded-xl shadow-md font-bold cursor-grab" data-correct="1">⬛ 看小像素块</div>
+                <div class="drag-item bg-white border-2 border-orange-400 p-4 rounded-xl shadow-md font-bold cursor-grab" data-correct="4">🎯 猜出最终答案</div>
+                <div class="drag-item bg-white border-2 border-orange-400 p-4 rounded-xl shadow-md font-bold cursor-grab" data-correct="2">🔍 扫描寻找边缘</div>
+            </div>
+
+            <div id="final-celebration" class="absolute inset-0 bg-white/95 hidden flex-col items-center justify-center z-50 rounded-2xl px-4 text-center backdrop-blur-sm">
+                <div class="text-8xl mb-6 animate-bounce">🏅</div>
+                <h2 class="text-4xl font-bold text-red-500 mb-4">流水线修复成功！</h2>
+                <div class="bg-yellow-200 border-4 border-yellow-400 rounded-3xl p-6 shadow-xl inline-block">
+                    <p class="text-2xl font-bold text-brown-600 mb-2">颁发给：</p>
+                    <p class="text-3xl font-bold text-orange-600">【机器识图小专家】</p>
+                </div>
+                <!-- 引导进入彩蛋 -->
+                <a href="#camera-section" class="mt-8 bg-blue-500 text-white px-8 py-3 rounded-full font-bold text-xl hover:bg-blue-400 shadow-lg animate-pulse">
+                    🚀 开启隐藏关卡：机器眼中的你！
+                </a>
+            </div>
+        </div>
+
+        <!-- ================= 新增：终极彩蛋 机器眼中的你 ================= -->
+        <div id="camera-section" class="cute-card p-6 md:p-10 bg-gradient-to-b from-gray-800 to-gray-900 border-8 border-gray-600 relative overflow-hidden text-white shadow-2xl">
+            <!-- 装饰性灯光 -->
+            <div class="absolute top-4 right-4 flex gap-2">
+                <div class="w-3 h-3 rounded-full bg-red-500" id="cam-led"></div>
+                <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                <div class="w-3 h-3 rounded-full bg-green-500"></div>
+            </div>
+
+            <div class="text-center mb-8">
+                <h2 class="text-4xl font-bold text-blue-300 mb-2 drop-shadow-[0_0_10px_rgba(147,197,253,0.5)]">🌌 终极彩蛋：机器眼中的你</h2>
+                <p class="text-gray-300 text-lg">打开机器的“眼睛”，看看在它眼里你会变成什么样子吧！</p>
+            </div>
+
+            <div class="flex flex-col md:flex-row gap-8 items-center md:items-start">
+                
+                <!-- 控制面板区 -->
+                <div class="flex flex-col gap-6 w-full md:w-64 z-10">
+                    <div class="bg-gray-700 p-4 rounded-2xl border-2 border-gray-600 shadow-inner">
+                        <h3 class="font-bold text-gray-400 mb-3 text-center border-b border-gray-600 pb-2">电源控制</h3>
+                        <button id="btn-cam-toggle" class="w-full bg-blue-500 border-blue-700 text-white font-bold py-3 px-4 rounded-xl control-btn shadow-lg">
+                            🟢 开启机器眼睛
+                        </button>
+                    </div>
+
+                    <div class="bg-gray-700 p-4 rounded-2xl border-2 border-gray-600 shadow-inner" id="filter-controls" style="opacity: 0.5; pointer-events: none;">
+                        <h3 class="font-bold text-gray-400 mb-3 text-center border-b border-gray-600 pb-2">视角切换器</h3>
+                        <div class="flex flex-col gap-3">
+                            <button class="filter-btn active-mode bg-gray-100 border-gray-300 text-gray-700 font-bold py-2 px-4 rounded-xl control-btn" data-mode="orig">
+                                🧑 普通原图
+                            </button>
+                            <button class="filter-btn bg-gray-100 border-gray-300 text-gray-700 font-bold py-2 px-4 rounded-xl control-btn" data-mode="pixel">
+                                🟩 像素模式
+                            </button>
+                            <button class="filter-btn bg-gray-100 border-gray-300 text-gray-700 font-bold py-2 px-4 rounded-xl control-btn" data-mode="edge">
+                                〰️ 边缘模式
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-gray-700/50 p-3 rounded-xl text-xs text-gray-400 text-center">
+                        🛡️ 隐私保护：画面只在你的浏览器里变化，不会上传到任何地方。
+                    </div>
+                </div>
+
+                <!-- 屏幕显示区 -->
+                <div class="flex-1 w-full max-w-2xl relative">
+                    <!-- 屏幕外框 -->
+                    <div class="relative w-full aspect-[4/3] bg-black rounded-3xl border-8 border-gray-700 overflow-hidden shadow-[0_0_30px_rgba(0,0,0,0.8)_inset]">
+                        
+                        <!-- 隐藏的原始视频流 -->
+                        <video id="webcam-video" autoplay="" playsinline="" class="hidden"></video>
+                        
+                        <!-- 渲染画布 -->
+                        <canvas id="webcam-canvas" class="w-full h-full object-cover"></canvas>
+                        
+                        <!-- 扫描线装饰 -->
+                        <div class="absolute inset-0 pointer-events-none cam-scanline hidden" id="cam-scan-overlay"></div>
+                        
+                        <!-- 待机/提示文字层 -->
+                        <div id="cam-overlay-text" class="absolute inset-0 flex flex-col items-center justify-center text-center p-6 bg-gray-900/80 backdrop-blur-sm z-10 transition-opacity duration-300">
+                            <div class="text-6xl mb-4">💤</div>
+                            <h3 class="text-2xl font-bold text-gray-300" id="cam-status-msg">点击左侧“开启”按钮启动设备</h3>
+                            <p class="text-gray-500 mt-2 text-sm max-w-md">如果弹出提示，请允许浏览器使用摄像头哦。<br>(建议在电脑端或HTTPS环境下体验)</p>
+                        </div>
+                    </div>
+
+                    <!-- 动态解说气泡 -->
+                    <div class="mt-6 bg-blue-900/50 border-2 border-blue-500/50 rounded-2xl p-4 text-blue-200 hidden" id="cam-explanation">
+                        💡 <span id="exp-text">在机器眼里，这只是一堆彩色的数据。</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 彩蛋通关提示 -->
+            <div id="cam-success-badge" class="absolute top-10 right-10 transform rotate-12 hidden z-20">
+                <div class="bg-yellow-400 text-red-600 font-bold px-4 py-2 rounded-lg shadow-xl border-2 border-yellow-200 text-xl animate-bounce">
+                    🎉 彩蛋解锁成功！
+                </div>
+            </div>
+        </div>
+
+    </section>
+
+    <section class="end-links" aria-labelledby="more-challenges-title">
+        <div class="end-links__panel">
+            <span class="page-chip">继续闯关</span>
+            <h2 id="more-challenges-title">接下来，试试两个知识测验吧</h2>
+            <p>主体网页里的动画和小游戏已经帮你认识了“机器看图像”的基本思路。现在可以继续进入两个测验页面，复习图像识别知识，也看看人脸应用在真实世界里为什么还要讲安全与合规。</p>
+            <div class="end-links__grid">
+                <a class="end-links__button end-links__button--blue" href="./quizzes/image-recognition/">
+                    <span class="end-links__emoji">🧠</span>
+                    <span>
+                        <strong>进入图像识别知识测验</strong>
+                        <small>继续巩固像素、特征、分类器和识别流程。</small>
+                    </span>
+                </a>
+                <a class="end-links__button end-links__button--orange" href="./quizzes/face-compliance/">
+                    <span class="end-links__emoji">🛡️</span>
+                    <span>
+                        <strong>进入人脸合规测验</strong>
+                        <small>了解 AI 人脸应用为什么要重视安全、标识和隐私。</small>
+                    </span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <footer class="page-footer">
+        <div class="page-footer__inner">
+            <p class="page-footer__title">《机器是怎么识别图像的？》项目导航</p>
+            <p class="page-footer__text">现在三个页面已经打通，适合直接上传到 GitHub，并可作为静态前端项目继续部署到 Vercel。</p>
+            <div class="page-nav__links">
+                <a class="page-link" href="#hero">回到顶部</a>
+                <a class="page-link page-link--primary" href="./quizzes/image-recognition/">图像识别知识测验</a>
+                <a class="page-link page-link--accent" href="./quizzes/face-compliance/">人脸合规测验</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JS 核心逻辑 -->
+    <script>
+        // --- 核心工具：拖拽系统 ---
+        function makeDraggable(element, onDragEnd) {
+            let startX, startY, initialX, initialY, isDragging = false;
+            const startDrag = (e) => {
+                e.preventDefault(); isDragging = true;
+                const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+                const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+                startX = clientX; startY = clientY;
+                const style = window.getComputedStyle(element);
+                const matrix = new DOMMatrixReadOnly(style.transform);
+                initialX = matrix.m41; initialY = matrix.m42;
+                element.classList.add('dragging');
+                document.addEventListener('mousemove', drag);
+                document.addEventListener('touchmove', drag, {passive: false});
+                document.addEventListener('mouseup', endDrag);
+                document.addEventListener('touchend', endDrag);
+            };
+            const drag = (e) => {
+                if (!isDragging) return; e.preventDefault();
+                const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+                const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+                const dx = clientX - startX; const dy = clientY - startY;
+                element.style.transform = `translate(${initialX + dx}px, ${initialY + dy}px) scale(1.1)`;
+            };
+            const endDrag = (e) => {
+                if (!isDragging) return; isDragging = false;
+                element.classList.remove('dragging');
+                document.removeEventListener('mousemove', drag); document.removeEventListener('touchmove', drag);
+                document.removeEventListener('mouseup', endDrag); document.removeEventListener('touchend', endDrag);
+                if(onDragEnd && !onDragEnd(element)) {
+                    element.style.transform = 'translate(0px, 0px)'; element.style.transition = 'transform 0.3s ease';
+                    setTimeout(() => element.style.transition = '', 300);
+                }
+            };
+            element.addEventListener('mousedown', startDrag); element.addEventListener('touchstart', startDrag, {passive: false});
+        }
+
+        function checkCollision(elem, target) {
+            const r1 = elem.getBoundingClientRect(); const r2 = target.getBoundingClientRect();
+            const centerX = r1.left + r1.width / 2; const centerY = r1.top + r1.height / 2;
+            return (centerX >= r2.left && centerX <= r2.right && centerY >= r2.top && centerY <= r2.bottom);
+        }
+
+        let stars = 0;
+        function gainStar() {
+            stars++;
+            if(stars <= 7) document.getElementById(`star-${stars}`).classList.add('star-active');
+        }
+
+        // ================= 各游戏逻辑缩略 =================
+        // Game 1
+        let g1Count = 0;
+        document.querySelectorAll('#g1-items .drag-item').forEach(item => {
+            makeDraggable(item, (el) => {
+                if (checkCollision(el, document.getElementById('g1-bot-eye')) && el.dataset.type === 'good') {
+                    el.style.transform = 'none'; el.style.position = 'static'; document.getElementById('g1-bot-eye').appendChild(el);
+                    g1Count++;
+                    if(g1Count === 2) { setTimeout(() => { document.getElementById('g1-feedback').style.display = 'flex'; gainStar(); }, 500); }
+                    return true;
+                }
+                if (checkCollision(el, document.getElementById('g1-trash')) && el.dataset.type === 'bad') {
+                    el.style.display = 'none'; return true;
+                }
+                return false;
+            });
+        });
+
+        // Game 2
+        let g2Revealed = false;
+        function game2Slide(val) {
+            if(g2Revealed) return;
+            document.getElementById('g2-img').style.filter = `blur(${val}px)`;
+            if (val == 0) {
+                g2Revealed = true; document.getElementById('g2-hole').style.display = 'block'; document.getElementById('g2-piece-container').style.display = 'flex';
+                makeDraggable(document.getElementById('g2-piece'), (el) => {
+                    const hole = document.getElementById('g2-hole');
+                    if(checkCollision(el, hole)) {
+                        el.style.display = 'none'; hole.style.background = 'transparent'; hole.style.border = 'none';
+                        setTimeout(() => { document.getElementById('g2-feedback').style.display = 'flex'; gainStar(); }, 500);
+                        return true;
+                    } return false;
+                });
+            }
+        }
+
+        // Game 3
+        const scanner = document.getElementById('g3-scanner'); const board = document.getElementById('g3-board');
+        let fClues = new Set(); let scDragging = false;
+        scanner.addEventListener('mousedown', (e)=>{e.preventDefault();scDragging=true;});
+        scanner.addEventListener('touchstart', (e)=>{e.preventDefault();scDragging=true;}, {passive:false});
+        document.addEventListener('mouseup', ()=>scDragging=false); document.addEventListener('touchend', ()=>scDragging=false);
+        const dragScanner = (e) => {
+            if(!scDragging) return; e.preventDefault();
+            const rect = board.getBoundingClientRect();
+            let x = (e.clientX||(e.touches&&e.touches[0].clientX)) - rect.left; let y = (e.clientY||(e.touches&&e.touches[0].clientY)) - rect.top;
+            scanner.style.left = Math.max(0, Math.min(x, rect.width)) - 48 + 'px'; scanner.style.top = Math.max(0, Math.min(y, rect.height)) - 48 + 'px';
+            ['hot-ear', 'hot-eye', 'hot-whisker'].forEach(id => {
+                const hz = document.getElementById(id); const cid = hz.dataset.clue;
+                if(!fClues.has(cid) && checkCollision(scanner, hz)) {
+                    fClues.add(cid); document.getElementById('clue-'+cid).classList.remove('opacity-30', 'grayscale');
+                    if(fClues.size === 3) setTimeout(() => { document.getElementById('g3-feedback').style.display = 'flex'; gainStar(); }, 800);
+                }
+            });
+        };
+        document.addEventListener('mousemove', dragScanner); document.addEventListener('touchmove', dragScanner, {passive:false});
+
+        // Game 4
+        let g4Count = 0;
+        document.querySelectorAll('#g4-pieces .drag-item').forEach(item => {
+            makeDraggable(item, (el) => {
+                if (checkCollision(el, document.getElementById('g4-brain'))) {
+                    el.style.display = 'none'; g4Count++;
+                    document.getElementById('g4-progress').style.height = (g4Count * 33.33) + '%';
+                    if(g4Count === 3) {
+                        document.getElementById('g4-progress').classList.replace('bg-pink-300', 'bg-green-400');
+                        setTimeout(() => { document.getElementById('g4-feedback').style.display = 'flex'; gainStar(); }, 600);
+                    } return true;
+                } return false;
+            });
+        });
+
+        // Game 5
+        const scCont = document.getElementById('scratch-container'); const overlay = document.getElementById('blur-overlay');
+        const brush = document.getElementById('g5-brush'); let sCount = 0; let isScr = false;
+        scCont.addEventListener('pointerdown', () => { isScr = true; brush.style.display = 'block'; });
+        document.addEventListener('pointerup', () => { isScr = false; brush.style.display = 'none'; });
+        scCont.addEventListener('pointermove', (e) => {
+            if(!isScr) return; e.preventDefault();
+            const rect = scCont.getBoundingClientRect(); brush.style.left = (e.clientX - rect.left) + 'px'; brush.style.top = (e.clientY - rect.top) + 'px';
+            sCount++;
+            if(sCount % 5 === 0 && sCount <= 100) {
+                overlay.style.opacity = 1 - (sCount / 100);
+                document.getElementById('g5-confidence').style.width = (20 + (sCount/100*80)) + '%';
+                if(sCount === 100) { overlay.style.display = 'none'; setTimeout(() => { document.getElementById('g5-feedback').style.display = 'flex'; gainStar(); }, 500); }
+            }
+        });
+
+        // Game 6
+        let g6Count = 0;
+        document.querySelectorAll('#g6-blocks .drag-item').forEach(item => {
+            makeDraggable(item, (el) => {
+                let dropped = false;
+                document.querySelectorAll('#g6-slots div[data-step]').forEach(slot => {
+                    if (checkCollision(el, slot) && slot.children.length === 0) {
+                        if(el.dataset.correct === slot.dataset.step) {
+                            el.style.position = 'static'; el.style.transform = 'none'; slot.innerHTML = ''; slot.appendChild(el);
+                            el.classList.remove('cursor-grab', 'drag-item'); slot.classList.replace('border-orange-300', 'border-green-400'); slot.classList.add('bg-green-50');
+                            dropped = true; g6Count++;
+                            if(g6Count === 4) { gainStar(); setTimeout(() => { document.getElementById('final-celebration').style.display = 'flex'; }, 500); }
+                        } else {
+                            const ot = el.textContent; el.textContent = '❌ 不对哦'; setTimeout(() => el.textContent = ot, 800);
+                        }
+                    }
+                }); return dropped;
+            });
+        });
+
+        // ================= 新增：摄像头终极彩蛋逻辑 =================
+        const video = document.getElementById('webcam-video');
+        const canvas = document.getElementById('webcam-canvas');
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+        
+        // 离屏Canvas，用于像素化缩小和优化边缘检测性能
+        const offCanvas = document.createElement('canvas');
+        const offCtx = offCanvas.getContext('2d', { willReadFrequently: true });
+        // 为了性能，内部处理分辨率固定
+        const internalWidth = 640;
+        const internalHeight = 480;
+        
+        const btnToggle = document.getElementById('btn-cam-toggle');
+        const filterBtns = document.querySelectorAll('.filter-btn');
+        const overlayText = document.getElementById('cam-overlay-text');
+        const statusMsg = document.getElementById('cam-status-msg');
+        const expBox = document.getElementById('cam-explanation');
+        const expText = document.getElementById('exp-text');
+        const scanOverlay = document.getElementById('cam-scan-overlay');
+        const led = document.getElementById('cam-led');
+
+        let isCamOn = false;
+        let camStream = null;
+        let animFrameId = null;
+        let currentCamMode = 'orig'; // 'orig', 'pixel', 'edge'
+        let hasEarnedCamStar = false;
+
+        const explanations = {
+            'orig': "在机器眼里，如果没有经过处理，这只是一堆密密麻麻的彩色数字。",
+            'pixel': "【像素模式】机器可能会把画面变模糊，先看一个个大方块的颜色，这就是“像素”。",
+            'edge': "【边缘模式】你看！机器把颜色去掉了，只提取了你的轮廓和边边角角，这是找线索的第一步！"
+        };
+
+        // 切换模式按钮事件
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                if(!isCamOn) return;
+                filterBtns.forEach(b => b.classList.remove('active-mode'));
+                btn.classList.add('active-mode');
+                currentCamMode = btn.dataset.mode;
+                
+                // 更新提示语
+                expBox.classList.remove('hidden');
+                expText.textContent = explanations[currentCamMode];
+
+                // 如果体验过非原图模式，给予最终彩蛋星星
+                if((currentCamMode === 'pixel' || currentCamMode === 'edge') && !hasEarnedCamStar) {
+                    hasEarnedCamStar = true;
+                    gainStar();
+                    document.getElementById('cam-success-badge').classList.remove('hidden');
+                }
+            });
+        });
+
+        // 开启/关闭摄像头
+        btnToggle.addEventListener('click', async () => {
+            if (isCamOn) {
+                stopCamera();
+            } else {
+                await startCamera();
+            }
+        });
+
+        async function startCamera() {
+            statusMsg.textContent = "正在请求摄像头，请允许...";
+            try {
+                // 优先请求前置摄像头
+                camStream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: "user", width: { ideal: internalWidth }, height: { ideal: internalHeight } },
+                    audio: false
+                });
+                
+                video.srcObject = camStream;
+                video.onloadedmetadata = () => {
+                    video.play();
+                    // 初始化 canvas 尺寸
+                    canvas.width = internalWidth;
+                    canvas.height = internalHeight;
+                    offCanvas.width = internalWidth;
+                    offCanvas.height = internalHeight;
+                    
+                    isCamOn = true;
+                    btnToggle.innerHTML = "🔴 关闭机器眼睛";
+                    btnToggle.classList.replace('bg-blue-500', 'bg-red-500');
+                    btnToggle.classList.replace('border-blue-700', 'border-red-700');
+                    overlayText.classList.add('opacity-0');
+                    setTimeout(() => overlayText.classList.add('hidden'), 300);
+                    document.getElementById('filter-controls').style.opacity = '1';
+                    document.getElementById('filter-controls').style.pointerEvents = 'auto';
+                    scanOverlay.classList.remove('hidden');
+                    led.classList.replace('bg-red-500', 'bg-green-400');
+                    led.classList.add('animate-pulse');
+
+                    expBox.classList.remove('hidden');
+                    expText.textContent = explanations[currentCamMode];
+
+                    // 开始渲染循环
+                    renderCameraFrame();
+                };
+            } catch (err) {
+                console.error("摄像头启动失败:", err);
+                statusMsg.innerHTML = "❌ 哎呀，无法打开摄像头。<br><span class='text-sm text-red-300'>请检查浏览器权限，或者当前环境可能不支持 (需 HTTPS)。</span>";
+            }
+        }
+
+        function stopCamera() {
+            if (camStream) {
+                camStream.getTracks().forEach(track => track.stop());
+            }
+            if (animFrameId) {
+                cancelAnimationFrame(animFrameId);
+            }
+            video.srcObject = null;
+            isCamOn = false;
+            
+            btnToggle.innerHTML = "🟢 开启机器眼睛";
+            btnToggle.classList.replace('bg-red-500', 'bg-blue-500');
+            btnToggle.classList.replace('border-red-700', 'border-blue-700');
+            overlayText.classList.remove('hidden', 'opacity-0');
+            statusMsg.textContent = "已关闭。点击开启再次体验";
+            document.getElementById('filter-controls').style.opacity = '0.5';
+            document.getElementById('filter-controls').style.pointerEvents = 'none';
+            expBox.classList.add('hidden');
+            scanOverlay.classList.add('hidden');
+            led.classList.replace('bg-green-400', 'bg-red-500');
+            led.classList.remove('animate-pulse');
+
+            // 清空画布
+            ctx.fillStyle = 'black';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+
+        // 核心渲染循环
+        function renderCameraFrame() {
+            if (!isCamOn) return;
+
+            // 无论什么模式，先将原视频画到主 ctx (如果是镜像需要翻转)
+            ctx.save();
+            ctx.translate(canvas.width, 0);
+            ctx.scale(-1, 1); // 镜像翻转，像照镜子一样
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            ctx.restore();
+
+            if (currentCamMode === 'pixel') {
+                applyPixelFilter();
+            } else if (currentCamMode === 'edge') {
+                applyEdgeFilter();
+            }
+            
+            animFrameId = requestAnimationFrame(renderCameraFrame);
+        }
+
+        // 像素化滤镜：利用 Canvas 的缩小再放大（关闭平滑）
+        function applyPixelFilter() {
+            const pixelSize = 25; // 像素块大小
+            const w = canvas.width;
+            const h = canvas.height;
+            const smallW = Math.ceil(w / pixelSize);
+            const smallH = Math.ceil(h / pixelSize);
+
+            // 1. 将主画布内容缩小画到 offCanvas
+            offCanvas.width = smallW;
+            offCanvas.height = smallH;
+            offCtx.drawImage(canvas, 0, 0, smallW, smallH);
+
+            // 2. 将 offCanvas 放大画回主画布
+            ctx.imageSmoothingEnabled = false; // 关键：关闭平滑插值产生马赛克
+            ctx.drawImage(offCanvas, 0, 0, smallW, smallH, 0, 0, w, h);
+            ctx.imageSmoothingEnabled = true; // 恢复
+        }
+
+        // 边缘检测滤镜：简化版差分算法 (适合儿童科普，性能好，类似黑客帝国视觉)
+        function applyEdgeFilter() {
+            const w = canvas.width;
+            const h = canvas.height;
+            
+            // 为了性能，缩小处理分辨率
+            const scale = 0.5;
+            const procW = Math.floor(w * scale);
+            const procH = Math.floor(h * scale);
+            
+            offCanvas.width = procW;
+            offCanvas.height = procH;
+            offCtx.drawImage(canvas, 0, 0, procW, procH);
+            
+            const imgData = offCtx.getImageData(0, 0, procW, procH);
+            const data = imgData.data;
+            const outData = new Uint8ClampedArray(data.length);
+            
+            const threshold = 25; // 边缘敏感度阈值
+            
+            // 简单遍历：当前像素与右边、下边像素做亮度差分
+            for (let y = 0; y < procH - 1; y++) {
+                for (let x = 0; x < procW - 1; x++) {
+                    let idx = (y * procW + x) * 4;
+                    let rightIdx = (y * procW + x + 1) * 4;
+                    let bottomIdx = ((y + 1) * procW + x) * 4;
+
+                    // 估算亮度 (RGB平均)
+                    let v = (data[idx] + data[idx+1] + data[idx+2]) / 3;
+                    let vRight = (data[rightIdx] + data[rightIdx+1] + data[rightIdx+2]) / 3;
+                    let vBottom = (data[bottomIdx] + data[bottomIdx+1] + data[bottomIdx+2]) / 3;
+
+                    let diff = Math.abs(v - vRight) + Math.abs(v - vBottom);
+
+                    // 写入 outData
+                    outData[idx+3] = 255; // Alpha
+                    if (diff > threshold) {
+                        // 发现边缘：画亮绿色线条
+                        outData[idx] = 74;     // R
+                        outData[idx+1] = 222;  // G
+                        outData[idx+2] = 128;  // B
+                    } else {
+                        // 背景：深色底
+                        outData[idx] = 10;
+                        outData[idx+1] = 15;
+                        outData[idx+2] = 25;
+                    }
+                }
+            }
+            
+            // 将处理后的数据放回 offCanvas
+            imgData.data.set(outData);
+            offCtx.putImageData(imgData, 0, 0);
+
+            // 将 offCanvas 覆盖画到主画布
+            ctx.drawImage(offCanvas, 0, 0, procW, procH, 0, 0, w, h);
+        }
+
+    </script>
+
+</body></html>

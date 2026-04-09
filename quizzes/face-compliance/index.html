@@ -1,0 +1,791 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>人脸合规测验</title>
+<link rel="stylesheet" href="../../assets/css/common.css">
+<link rel="stylesheet" href="../../assets/css/quiz-theme.css">
+<style>
+:root{--bg:#0b0c0f;--panel:#101223;--card:#141729;--fg:#e9e9ee;--muted:#a6a8b3;--line:#2a2f48;--good:#2ecc71;--bad:#ff5c5c;--accent:#6aa4ff;--btn:#1b2036;--btn2:#151a2c;--shadow:0 18px 48px rgba(0,0,0,.35);--r:14px}
+@media (prefers-color-scheme: light){:root{--bg:#f6f7fb;--panel:#ffffff;--card:#ffffff;--fg:#111;--muted:#555;--line:#e7e9f0;--good:#1e9e53;--bad:#d83b3b;--accent:#2e6cff;--btn:#f1f3fa;--btn2:#eef1f9;--shadow:0 18px 48px rgba(17,17,17,.12)}}
+*{box-sizing:border-box;writing-mode:inherit;text-orientation:inherit}
+html,body{margin:0;padding:0;min-height:100%;background:var(--bg);color:var(--fg);font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;line-height:1.35;writing-mode:horizontal-tb !important;text-orientation:mixed !important;direction:ltr !important}
+a{color:inherit}
+button,select,input,textarea{font:inherit;writing-mode:horizontal-tb !important;text-orientation:mixed !important;direction:ltr !important}
+button,select{background:var(--btn);color:var(--fg);border:1px solid var(--line);border-radius:12px;padding:8px 10px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+button:hover,select:hover{filter:brightness(1.03)}
+button:active{transform:translateY(1px)}
+button:disabled{opacity:.6;cursor:not-allowed;transform:none}
+kbd{font-size:12px;padding:2px 6px;border:1px solid var(--line);border-radius:8px;background:var(--btn2);color:var(--muted)}
+
+.top{position:sticky;top:0;z-index:20;background:color-mix(in srgb, var(--bg) 88%, transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.topin{max-width:980px;margin:0 auto;padding:10px 12px;display:flex;flex-direction:column;gap:10px}
+.toprow{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.brand{display:flex;gap:10px;align-items:center;min-width:0;flex:1 1 420px}
+.logo{width:34px;height:34px;border-radius:12px;background:linear-gradient(135deg, color-mix(in srgb, var(--accent) 75%, transparent), color-mix(in srgb, var(--good) 40%, transparent));border:1px solid var(--line);flex:0 0 auto}
+.title{display:flex;flex-direction:column;gap:2px;min-width:0}
+.title .t{font-weight:850;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.title .s{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.actionsTop{display:flex;gap:8px;align-items:center;flex:0 1 auto;flex-wrap:wrap;justify-content:flex-end}
+.pill{border-radius:999px;padding:8px 12px}
+.toprow2{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.progress{flex:1 1 520px;height:10px;border-radius:999px;border:1px solid var(--line);overflow:hidden;background:var(--btn2);min-width:220px}
+.progress .bar{height:100%;width:0%;background:linear-gradient(90deg,var(--accent),color-mix(in srgb, var(--accent) 60%, var(--good)))}
+.stat{font-size:12px;color:var(--muted);white-space:nowrap;flex:0 0 auto}
+
+.main{max-width:980px;margin:0 auto;padding:14px 12px 76px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px;margin-top:12px}
+.card.hidden{display:none}
+
+.qhead{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:start}
+.qno{font-weight:950;line-height:1.1;padding-top:1px}
+.qmeta{display:flex;gap:8px;align-items:center;flex-wrap:wrap;color:var(--muted);font-size:12px}
+.badge{border:1px solid var(--line);border-radius:999px;padding:2px 8px;background:var(--btn2)}
+.qtext{grid-column:1 / -1;font-weight:760;line-height:1.55;margin-top:2px;text-indent:2em;word-break:break-word}
+
+.opts{margin-top:12px;display:grid;gap:10px}
+.opt{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:color-mix(in srgb, var(--card) 88%, transparent);transition:transform .05s ease, filter .05s ease, border-color .12s ease, box-shadow .12s ease}
+.opt:hover{filter:brightness(1.02)}
+.opt:active{transform:translateY(1px)}
+.opt input{margin-top:2px;flex:0 0 auto}
+.opt.selected{border-color:color-mix(in srgb, var(--accent) 45%, var(--line));box-shadow:0 0 0 2px color-mix(in srgb, var(--accent) 18%, transparent) inset}
+.opt.correct{border-color:color-mix(in srgb, var(--good) 75%, var(--line));box-shadow:0 0 0 2px color-mix(in srgb, var(--good) 18%, transparent) inset}
+.opt.wrong{border-color:color-mix(in srgb, var(--bad) 80%, var(--line));box-shadow:0 0 0 2px color-mix(in srgb, var(--bad) 16%, transparent) inset}
+
+.actions{margin-top:12px;display:flex;gap:10px;flex-wrap:wrap}
+.feedback{margin-top:10px;font-weight:850}
+.feedback.good{color:var(--good)}
+.feedback.bad{color:var(--bad)}
+.detail{margin-top:10px;color:var(--muted);font-size:13px;line-height:1.65;display:none;word-break:break-word}
+.detail.show{display:block}
+
+.hr{height:1px;background:var(--line);margin:10px 0}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:14px;z-index:60;max-width:calc(100vw - 24px);background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:10px 14px;box-shadow:var(--shadow);font-size:13px;color:var(--fg);display:none}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);opacity:0;pointer-events:none;transition:opacity .16s ease;z-index:39}
+.overlay.show{opacity:1;pointer-events:auto}
+.side{position:fixed;top:0;right:0;height:100vh;width:340px;max-width:92vw;background:var(--panel);border-left:1px solid var(--line);transform:translateX(100%);transition:transform .16s ease;z-index:40;display:flex;flex-direction:column;box-shadow:var(--shadow)}
+.side.open{transform:translateX(0)}
+.sideHead{padding:12px;border-bottom:1px solid var(--line);display:flex;gap:10px;align-items:center}
+.sideHead .h{font-weight:850}
+.sideHead .sp{flex:1}
+.tabRow{padding:10px 12px;display:flex;gap:8px}
+.tabBtn{flex:1;border-radius:12px;background:var(--btn2)}
+.tabBtn.active{background:var(--btn);border-color:color-mix(in srgb, var(--accent) 30%, var(--line))}
+.pane{padding:12px;overflow:auto}
+.grid{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}
+.qbtn{border-radius:12px;padding:10px 0;text-align:center;border:1px solid var(--line);background:var(--btn2);color:var(--fg);user-select:none}
+.qbtn.todo{opacity:.85}
+.qbtn.ok{border-color:color-mix(in srgb, var(--good) 55%, var(--line));box-shadow:0 0 0 2px color-mix(in srgb, var(--good) 14%, transparent) inset}
+.qbtn.bad{border-color:color-mix(in srgb, var(--bad) 55%, var(--line));box-shadow:0 0 0 2px color-mix(in srgb, var(--bad) 14%, transparent) inset}
+.qbtn.active{outline:2px solid color-mix(in srgb, var(--accent) 55%, transparent);outline-offset:1px}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.row .lab{min-width:92px;color:var(--muted);font-size:12px}
+.row .ctrl{flex:1 1 auto;min-width:160px}
+.small{font-size:12px;color:var(--muted)}
+.foot{max-width:980px;margin:0 auto;padding:0 12px 22px;color:var(--muted);font-size:12px}
+@media (max-width: 540px){.grid{grid-template-columns:repeat(5,1fr)}}
+</style>
+<body class="page-quiz page-quiz--face">
+  <header class="page-nav">
+    <div class="page-nav__inner">
+      <a class="page-brand" href="../../">
+        <img src="../../assets/images/logo.png" alt="机器识图乐园徽标">
+        <span>机器识图乐园</span>
+      </a>
+      <nav class="page-nav__links" aria-label="页面跳转">
+        <a class="page-link" href="../../">返回主体网页</a>
+        <a class="page-link page-link--primary" href="../image-recognition/">跳转到图像识别知识测验</a>
+      </nav>
+    </div>
+  </header>
+  <div class="top">
+    <div class="topin">
+      <div class="toprow">
+        <div class="brand">
+          <img src="../../assets/images/logo.png" alt="机器识图乐园徽标" width="50" height="50">
+          <div class="title" title="人脸合规测验">
+            <div class="t" id="titleT">人脸合规测验</div>
+            <div class="s" id="titleS">认识 AI 人脸生成、人脸识别以及真实场景中的合规边界。</div>
+          </div>
+        </div>
+        <div class="actionsTop">
+          <button class="pill" id="modeBtn" title="切换模式 (M)">单题</button>
+          <button class="pill" id="nextBtn" title="下一未做">下一未做</button>
+          <button class="pill" id="sideBtn" title="打开侧栏 (L)">侧栏</button>
+        </div>
+      </div>
+      <div class="toprow2">
+        <div class="progress" aria-label="progress">
+          <div class="bar" id="bar" style="width: 12%;"></div>
+        </div>
+        <div class="stat" id="stat">已判分 3/25 · 正确 2</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="main" id="main"><div class="card hidden" data-qi="0"><div class="qhead"><div class="qno">第 1 题</div><div class="qmeta"><span class="badge">单选</span><span class="badge">4 选项</span></div><div class="qtext">在人脸生成合成生态中，谁应对训练数据来源的合法性承担主要责任？</div></div><div class="opts"><label class="opt selected correct"><input type="radio" name="q0" disabled=""><div><b>A. </b>技术提供者</div></label><label class="opt"><input type="radio" name="q0" disabled=""><div><b>B. </b>最终消费者</div></label><label class="opt"><input type="radio" name="q0" disabled=""><div><b>C. </b>广告运营商</div></label><label class="opt"><input type="radio" name="q0" disabled=""><div><b>D. </b>硬件设备生产商</div></label></div><div class="actions"><button>重做</button><button>解析/提示</button></div><div class="feedback good">✅ 正确</div><div class="detail"><div><b>提示：</b>考虑在人工智能开发链条中，哪一方直接接触并处理原始数据集。</div><div style="margin-top: 8px;"><b>解析：</b></div><div>• A：作为算法和模型的研发方，技术提供者直接负责数据的采集与处理，是数据合规的源头责任人。</div><div>• B：普通用户通常只是产品的使用者，不参与模型的训练数据筛选过程。</div><div>• C：广告方仅是生成内容的应用场景之一，不决定底层训练数据的合法性。</div><div>• D：硬件商提供计算基础，而训练数据的合规性属于软件与数据治理的范畴。</div></div></div><div class="card hidden" data-qi="1"><div class="qhead"><div class="qno">第 2 题</div><div class="qmeta"><span class="badge">单选</span><span class="badge">4 选项</span></div><div class="qtext">根据合规要求，添加“隐性标识”的主要目的是什么？</div></div><div class="opts"><label class="opt selected correct"><input type="radio" name="q1" disabled=""><div><b>A. </b>确保内容的识别与追溯</div></label><label class="opt"><input type="radio" name="q1" disabled=""><div><b>B. </b>提升人脸图像的清晰度</div></label><label class="opt"><input type="radio" name="q1" disabled=""><div><b>C. </b>自动为用户添加滤镜</div></label><label class="opt"><input type="radio" name="q1" disabled=""><div><b>D. </b>减少文件占用的存储空间</div></label></div><div class="actions"><button>重做</button><button>解析/提示</button></div><div class="feedback good">✅ 正确</div><div class="detail"><div><b>提示：</b>这种标识通常对肉眼不可见，主要用于安全追踪。</div><div style="margin-top: 8px;"><b>解析：</b></div><div>• A：隐性标识（如数字水印）能够在不影响视觉效果的情况下，记录生成信息以便后续核查。</div><div>• B：标识属于安全管理手段，并不具备优化图像像素或视觉质量的功能。</div><div>• C：滤镜属于娱乐化功能，而隐性标识是法律规定的合规技术手段。</div><div>• D：添加标识信息通常会略微增加数据量，而非进行数据压缩。</div></div></div><div class="card" data-qi="2"><div class="qhead"><div class="qno">第 3 题</div><div class="qmeta"><span class="badge">单选</span><span class="badge">4 选项</span></div><div class="qtext">在人脸生成合成场景下，对于可能导致公众混淆的非真实视频，应当采取哪种标识？</div></div><div class="opts"><label class="opt correct"><input type="radio" name="q2" disabled=""><div><b>A. </b>显著标识（显性标识）</div></label><label class="opt"><input type="radio" name="q2" disabled=""><div><b>B. </b>临时删除标签</div></label><label class="opt selected wrong"><input type="radio" name="q2" disabled=""><div><b>C. </b>仅存储在元数据中</div></label><label class="opt"><input type="radio" name="q2" disabled=""><div><b>D. </b>加密压缩标识</div></label></div><div class="actions"><button>重做</button><button>解析/提示</button></div><div class="feedback bad">❌ 错误（正确答案：A）</div><div class="detail show"><div><b>提示：</b>为了让观众一眼认出这是 AI 生成的内容，需要这种标识。</div><div style="margin-top: 8px;"><b>解析：</b></div><div>• A：为了防止公众产生误认，必须在生成的图像或视频的合理位置进行清晰的标注。</div><div>• B：删除标识会增加欺诈和误导风险，违反了生成式内容的合规原则。</div><div>• C：仅在元数据中标记无法起到提醒普通观众的作用，不足以防范公众混淆。</div><div>• D：加密是为了安全传输，而标识的目的是为了让公众一眼看清内容的生成属性。</div></div></div><div class="card hidden" data-qi="3"><div class="qhead"><div class="qno">第 4 题</div><div class="qmeta"><span class="badge">单选</span><span class="badge">4 选项</span></div><div class="qtext">对于提供人脸美颜修饰功能的合成服务，是否必须添加显著标识？</div></div><div class="opts"><label class="opt"><input type="radio" name="q3"><div><b>A. </b>不需要，因为它属于低风险场景且影响用户体验</div></label><label class="opt"><input type="radio" name="q3"><div><b>B. </b>必须添加，所有 AI 处理过的图像都需显著标注</div></label><label class="opt"><input type="radio" name="q3"><div><b>C. </b>仅在光线暗的情况下需要</div></label><label class="opt"><input type="radio" name="q3"><div><b>D. </b>只有收费版本才需要添加</div></label></div><div class="actions"><button>重做</button><button>解析/提示</button></div><div class="feedback"></div><div class="detail"><div><b>提示：</b>考虑这种功能是否会让人误以为图片中的人是一个完全不存在的“拟真人物”。</div><div style="margin-top: 8px;"><b>解析：</b></div><div>• A：美颜修饰通常不会引起公众对真实身份的误认，合规上允许根据风险等级区分对待。</div><div>• B：法律要求通常针对可能引起误导的高风险场景，并非一刀切地要求所有功能。</div><div>• C：合规标识的要求取决于功能性质和风险等级，而非环境光照条件。</div><div>• D：安全合规义务与收费模式无关，而是基于保护公众知情权和预防风险。</div></div></div><div class="card hidden" data-qi="4"><div class="qhead"><div class="qno">第 5 题</div><div class="qmeta"><span class="badge">单选</span><span class="badge">4 选项</span></div><div class="qtext">技术提供者在算法安全评估中，应当定期审核哪项机制？</div></div><div class="opts"><label class="opt"><input type="radio" name="q4"><div><b>A. </b>生成合成类算法机制机理的正当性</div></label><label class="opt"><input type="radio" name="q4"><div><b>B. </b>用户的个人财务报表</div></label><label class="opt"><input type="radio" name="q4"><div><b>C. </b>硬件服务器的折旧率</div></label><label class="opt"><input type="radio" name="q4"><div><b>D. </b>竞争对手的市场占有率</div></label></div><div class="actions"><button>重做</button><button>解析/提示</button></div><div class="feedback"></div><div class="detail"><div><b>提示：</b>关注算法本身的工作原理和它可能产生的社会影响。</div><div style="margin-top: 8px;"><b>解析：</b></div><div>• A：定期审核算法机理有助于确保系统运行符合伦理标准并预防生成不良内容。</div><div>• B：企业无需且无权审核用户的个人财务隐私，这不属于算法安全评估范畴。</div><div>• C：硬件管理属于企业行政管理，不属于针对算法合规性的专项评估。</div><div>• D：市场调研与算法的安全性及正当性审核没有直接的法律关联。</div></div></div><div class="card hidden" data-qi="5"><div class="qhead"><div class="qno">第 6 题</div><div class="qmeta"><span class="badge">单选</span><span class="badge">4 选项</span></div><div class="qtext">深度合成服务提供者在提供人脸编辑功能时，必须履行哪项义务？</div></div><div class="opts"><label class="opt"><input type="radio" name="q5"><div><b>A. </b>提示用户依法取得被编辑人的单独同意</div></label><label class="opt"><input type="radio" name="q5"><div><b>B. </b>强制用户上传所有通讯录信息</div></label><label class="opt"><input type="radio" name="q5"><div><b>C. </b>要求用户支付额外的安全保证金</div></label><label class="opt"><input type="radio" name="q5"><div><b>D. </b>禁止用户在白天使用该功能</div></label></div><div class="actions"><button>重做</button><button>解析/提示</button></div><div class="feedback"></div><div class="detail"><div><b>提示：</b>处理像人脸这样的敏感信息，最核心的合规要求是什么？</div><div style="margin-top: 8px;"><b>解析：</b></div><div>• A：人脸属于敏感个人信息，法律要求在编辑他人人脸时必须获得其明确授权。</div><div>• B：这种行为超出了必要性原则，属于非法过度收集个人信息。</div><div>• C：安全合规是企业的法定责任，不应通过向用户收取保证金来替代。</div><div>• D：合规管理旨在确保过程安全，而非对用户的使用时间进行无理限制。</div></div></div><div class="card hidden" data-qi="6"><div class="qhead"><div class="qno">第 7 题</div><div class="qmeta"><span class="badge">单选</span><span class="badge">4 选项</span></div><div class="qtext">在人脸生成算法的训练过程中，采取“去标识化”措施的主要作用是？</div></div><div class="opts"><label class="opt"><input type="radio" name="q6"><div><b>A. </b>保护训练数据中的个人隐私</div></label><label class="opt"><input type="radio" name="q6"><div><b>B. </b>加快模型的计算速度</div></label><label class="opt"><input type="radio" name="q6"><div><b>C. </b>增加图像的像素深度</div></label><label class="opt"><input type="radio" name="q6"><div><b>D. </b>为了让标注员更辛苦</div></label></div><div class="actions"><button>重做</button><button>解析/提示</button></div><div class="feedback"></div><div class="detail"><div><b>提示：</b>想想在处理大量包含真人面部的数据时，法律最关心什么。</div><div style="margin-top: 8px;"><b>解析：</b></div><div>• A：通过删除或隐藏能够识别特定个人的标识符，可以降低训练数据泄露带来的风险。</div><div>• B：去标识化是安全措施，对算法执行效率的提升作用有限。</div><div>• C：这是数据处理层面的操作，与图像本身的物理参数（如像素）无关。</div><div>• D：去标识化是为了合规与安全，而非人为增加工作难度。</div></div></div><div class="card hidden" data-qi="7"><div class="qhead"><div class="qno">第 8 题</div><div class="qmeta"><span class="badge">单选</span><span class="badge">4 选项</span></div><div class="qtext">生成式 AI 产品服务提供者应当如何处理用户输入的违规指令？</div></div><div class="opts"><label class="opt"><input type="radio" name="q7"><div><b>A. </b>通过敏感词筛查或逻辑识别进行过滤</div></label><label class="opt"><input type="radio" name="q7"><div><b>B. </b>自动将违规指令发给该用户的社交好友</div></label><label class="opt"><input type="radio" name="q7"><div><b>C. </b>将指令翻译成外语后再执行</div></label><label class="opt"><input type="radio" name="q7"><div><b>D. </b>直接无视，由系统自动生成随机图片</div></label></div><div class="actions"><button>重做</button><button>解析/提示</button></div><div class="feedback"></div><div class="detail"><div><b>提示：</b>这是预防“输入端”风险的关键技术步骤。</div><div style="margin-top: 8px;"><b>解析：</b></div><div>• A：利用技术手段拦截不当指令，可以从源头上预防系统生成不良或违法内容。</div><div>• B：这种行为侵犯了用户的通信秘密，且无法解决合规性问题。</div><div>• C：翻译无法改变指令的实质违规性，仍会导致不良内容的产生。</div><div>• D：消极应对无法履行审核义务，服务商必须主动识别并拦截违规请求。</div></div></div><div class="card hidden" data-qi="8"><div class="qhead"><div class="qno">第 9 题</div><div class="qmeta"><span class="badge">单选</span><span class="badge">4 选项</span></div><div class="qtext">当 AI 系统发现已经生成了不符合法律要求的图片时，除了过滤内容，还应怎么做？</div></div><div class="opts"><label class="opt"><input type="radio" name="q8"><div><b>A. </b>通过模型优化训练防止再次生成</div></label><label class="opt"><input type="radio" name="q8"><div><b>B. </b>给该用户发送促销礼券以示安慰</div></label><label class="opt"><input type="radio" name="q8"><div><b>C. </b>提高该图片在搜索结果中的权重</div></label><label class="opt"><input type="radio" name="q8"><div><b>D. </b>强制关停所有用户的服务器</div></label></div><div class="actions"><button>重做</button><button>解析/提示</button></div><div class="feedback"></div><div class="detail"><div><b>提示：</b>考虑如何让系统从错误中“学习”，以避免重蹈覆辙。</div><div style="margin-top: 8px;"><b>解析：</b></div><div>• A：通过反馈循环改进模型，可以从根本上减少未来产生类似违规内容的概率。</div><div>• B：违规内容的处理应侧重于技术修正和合规管理，而非市场营销手段。</div><div>• C：增加违规内容的曝光度会加重法律责任，违反了安全评估的基本原则。</div><div>• D：这种做法反应过度，合规要求的是针对特定问题的精准治理与模型改进。</div></div></div><div class="card hidden" data-qi="9"><div class="qhead"><div class="qno">第 10 题</div><div class="qmeta"><span class="badge">单选</span><span class="badge">4 选项</span></div><div class="qtext">算法备案制度的主要目的是什么？</div></div><div class="opts"><label class="opt"><input type="radio" name="q9"><div><b>A. </b>实现算法透明化以便政府监督</div></label><label class="opt"><input type="radio" name="q9"><div><b>B. </b>为企业颁发行政许可证书</div></label><label class="opt"><input type="radio" name="q9"><div><b>C. </b>限制企业的市场竞争能力</div></label><label class="opt"><input type="radio" name="q9"><div><b>D. </b>代替企业内部的安全测试</div></label></div><div class="actions"><button>重做</button><button>解析/提示</button></div><div class="feedback"></div><div class="detail"><div><b>提示：</b>这是一种行政告知机制，旨在让监管者了解“黑盒”里的逻辑。</div><div style="margin-top: 8px;"><b>解析：</b></div><div>• A：备案属于告知式管理，为监管机构提供必要信息，以评估算法的合规性与安全性。</div><div>• B：备案不同于行政许可，它不代表政府对算法性能的官方担保。</div><div>• C：备案是为了安全治理，而非出于打压企业竞争或限制商业发展的目的。</div><div>• D：外部备案不能取代企业的内部自评估和安全测试，两者是互补关系。</div></div></div><div class="card hidden" data-qi="10"><div class="qhead"><div class="qno">第 11 题</div><div class="qmeta"><span class="badge">单选</span><span class="badge">4 选项</span></div><div class="qtext">技术提供者在训练数据人工标注过程中，为什么要制定统一的标注规则？</div></div><div class="opts"><label class="opt"><input type="radio" name="q10"><div><b>A. </b>保证算法模型的准确性和一致性</div></label><label class="opt"><input type="radio" name="q10"><div><b>B. </b>为了让不同标注员互相竞争</div></label><label class="opt"><input type="radio" name="q10"><div><b>C. </b>防止标注员在工作时听音乐</div></label><label class="opt"><input type="radio" name="q10"><div><b>D. </b>因为国家要求所有文档格式必须一样</div></label></div><div class="actions"><button>重做</button><button>解析/提示</button></div><div class="feedback"></div><div class="detail"><div><b>提示：</b>如果每个人对图片的标注标准都不一样，训练出来的 AI 会怎样？</div><div style="margin-top: 8px;"><b>解析：</b></div><div>• A：统一的规则能减少标注偏差，确保模型学习到的是客观、高质量的视觉规律。</div><div>• B：规则是为了标准化输出，而非通过竞赛机制来管理员工。</div><div>• C：规则内容关注的是数据标注的技术标准，不涉及具体的办公室纪律。</div><div>• D：核心原因是模型训练对数据质量的要求，而非单纯的格式审美需求。</div></div></div><div class="card hidden" data-qi="11"><div class="qhead"><div class="qno">第 12 题</div><div class="qmeta"><span class="badge">单选</span><span class="badge">4 选项</span></div><div class="qtext">在生成合成结果的审核中，“黑白名单”机制通常如何运作？</div></div><div class="opts"><label class="opt"><input type="radio" name="q11"><div><b>A. </b>自动屏蔽名单中的违规内容并放行合规内容</div></label><label class="opt"><input type="radio" name="q11"><div><b>B. </b>将所有黑头发的用户加入黑名单</div></label><label class="opt"><input type="radio" name="q11"><div><b>C. </b>白名单用户不需要遵守任何法律</div></label><label class="opt"><input type="radio" name="q11"><div><b>D. </b>黑名单是指无法连接网络的用户</div></label></div><div class="actions"><button>重做</button><button>解析/提示</button></div><div class="feedback"></div><div class="detail"><div><b>提示：</b>这是一种常见的用于分类过滤的技术过滤手段。</div><div style="margin-top: 8px;"><b>解析：</b></div><div>• A：这是一种提高审核效率的技术手段，通过预设规则实现大部分内容的自动化处理。</div><div>• B：这属于严重的歧视行为，违背了算法公平性和伦理原则。</div><div>• C：法律对所有主体具有普适性，名单机制仅用于流程加速，不豁免法律责任。</div><div>• D：在内容审核语境下，黑名单针对的是违规的内容类别或特征标识。</div></div></div><div class="card hidden" data-qi="12"><div class="qhead"><div class="qno">第 13 题</div><div class="qmeta"><span class="badge">单选</span><span class="badge">4 选项</span></div><div class="qtext">为了防止“自动化偏差”，服务提供者应当在人脸识别系统中加入什么？</div></div><div class="opts"><label class="opt"><input type="radio" name="q12"><div><b>A. </b>人工干预和监督工具</div></label><label class="opt"><input type="radio" name="q12"><div><b>B. </b>自动关机计时器</div></label><label class="opt"><input type="radio" name="q12"><div><b>C. </b>更多的广告弹窗</div></label><label class="opt"><input type="radio" name="q12"><div><b>D. </b>自动增加对比度的插件</div></label></div><div class="actions"><button>重做</button><button>解析/提示</button></div><div class="feedback"></div><div class="detail"><div><b>提示：</b>当机器可能犯错或过度自信时，谁应该来最后把关？</div><div style="margin-top: 8px;"><b>解析：</b></div><div>• A：由人类介入监督可以纠正算法的盲目依赖，确保最终决策的合理性与责任归属。</div><div>• B：偏差是指决策逻辑的问题，定时关机无法从根本上纠正算法的偏见。</div><div>• C：广告会干扰系统运行，与算法的鲁棒性及监督管理目标背道而驰。</div><div>• D：这属于图像处理改进，无法解决算法在决策逻辑上的偏差风险。</div></div></div><div class="card hidden" data-qi="13"><div class="qhead"><div class="qno">第 14 题</div><div class="qmeta"><span class="badge">单选</span><span class="badge">4 选项</span></div><div class="qtext">在人脸识别产业中，“守门人”义务通常适用于哪类主体？</div></div><div class="opts"><label class="opt"><input type="radio" name="q13"><div><b>A. </b>大型平台型应用及分发平台</div></label><label class="opt"><input type="radio" name="q13"><div><b>B. </b>购买云服务的个人开发者</div></label><label class="opt"><input type="radio" name="q13"><div><b>C. </b>打印店的老板</div></label><label class="opt"><input type="radio" name="q13"><div><b>D. </b>专门负责打扫机房的人员</div></label></div><div class="actions"><button>重做</button><button>解析/提示</button></div><div class="feedback"></div><div class="detail"><div><b>提示：</b>想一想谁拥有掌控第三方 APP 接入和分发的“权力”。</div><div style="margin-top: 8px;"><b>解析：</b></div><div>• A：由于控制了流量入口和技术环境，这些主体有责任监管接入的第三方应用是否合规。</div><div>• B：个人开发者通常不具备管控行业生态的能力，不属于“守门人”定义的范围。</div><div>• C：“守门人”是指数字生态中的关键节点，普通线下小微企业不承担此类义务。</div><div>• D：守门人职责是指对技术环境和运营条款的管控能力，而非物理意义上的值守。</div></div></div><div class="card hidden" data-qi="14"><div class="qhead"><div class="qno">第 15 题</div><div class="qmeta"><span class="badge">单选</span><span class="badge">4 选项</span></div><div class="qtext">算法透明度义务要求技术提供者公示哪些信息？</div></div><div class="opts"><label class="opt"><input type="radio" name="q14"><div><b>A. </b>预训练数据的来源、规模和质量描述</div></label><label class="opt"><input type="radio" name="q14"><div><b>B. </b>首席执行官的家庭住址</div></label><label class="opt"><input type="radio" name="q14"><div><b>C. </b>公司内部的所有商业合同金额</div></label><label class="opt"><input type="radio" name="q14"><div><b>D. </b>每个员工的咖啡偏好</div></label></div><div class="actions"><button>重做</button><button>解析/提示</button></div><div class="feedback"></div><div class="detail"><div><b>提示：</b>关注那些能影响用户对 AI 结果产生“信任”的技术参数。</div><div style="margin-top: 8px;"><b>解析：</b></div><div>• A：公开这些信息有助于建立用户信任，并让监管方评估模型的潜在偏见与局限性。</div><div>• B：算法透明度关注的是技术逻辑和数据基础，而非企业管理层的个人隐私。</div><div>• C：财务细节属于商业机密，不属于旨在保障用户知情权的算法透明度范畴。</div><div>• D：这与算法的安全评估、逻辑解释及合规性完全没有关联。</div></div></div><div class="card hidden" data-qi="15"><div class="qhead"><div class="qno">第 16 题</div><div class="qmeta"><span class="badge">单选</span><span class="badge">4 选项</span></div><div class="qtext">如果技术提供者使用“合成数据”进行模型训练，应当采取什么措施？</div></div><div class="opts"><label class="opt"><input type="radio" name="q15"><div><b>A. </b>将其与真实数据模型进行比较以验证准确性</div></label><label class="opt"><input type="radio" name="q15"><div><b>B. </b>禁止在说明文档中提到使用了合成数据</div></label><label class="opt"><input type="radio" name="q15"><div><b>C. </b>确保合成数据里的所有人物都戴着墨镜</div></label><label class="opt"><input type="radio" name="q15"><div><b>D. </b>自动将合成数据的版权赠送给政府</div></label></div><div class="actions"><button>重做</button><button>解析/提示</button></div><div class="feedback"></div><div class="detail"><div><b>提示：</b>为了保证 AI 不会在假数据里“跑偏”，需要一种校准手段。</div><div style="margin-top: 8px;"><b>解析：</b></div><div>• A：由于合成数据可能偏离现实，必须通过与真实场景对比来确保模型的泛化能力。</div><div>• B：隐瞒数据来源违反了透明度原则，且不利于后续的风险评估。</div><div>• C：这种人为限制会破坏数据的多样性，导致模型在处理真实面部时失效。</div><div>• D：合规要求关注的是数据的准确性和安全性，不涉及版权赠与的法律强制。</div></div></div><div class="card hidden" data-qi="16"><div class="qhead"><div class="qno">第 17 题</div><div class="qmeta"><span class="badge">单选</span><span class="badge">4 选项</span></div><div class="qtext">人脸识别算法备案中的“行政告知式”意味着什么？</div></div><div class="opts"><label class="opt"><input type="radio" name="q16"><div><b>A. </b>备案不设定权利，仅为政府提供监管信息基础</div></label><label class="opt"><input type="radio" name="q16"><div><b>B. </b>只要备案了，企业就可以免受任何法律追究</div></label><label class="opt"><input type="radio" name="q16"><div><b>C. </b>政府必须为备案成功的企业提供补贴</div></label><label class="opt"><input type="radio" name="q16"><div><b>D. </b>备案信息只能用书信方式邮寄</div></label></div><div class="actions"><button>重做</button><button>解析/提示</button></div><div class="feedback"></div><div class="detail"><div><b>提示：</b>备案和审批的区别在于，它更像是一种“打招呼”而非“拿执照”。</div><div style="margin-top: 8px;"><b>解析：</b></div><div>• A：这种备案的目的是信息对称，而非通过行政手段赋予企业特定的经营权。</div><div>• B：备案只是合规程序的一部分，不能作为违法行为的“免死金牌”。</div><div>• C：备案是企业的法定合规义务，与政府的产业激励政策没有必然联系。</div><div>• D：“告知式”是指备案的法律性质，而非具体的递交媒介或通信手段。</div></div></div><div class="card hidden" data-qi="17"><div class="qhead"><div class="qno">第 18 题</div><div class="qmeta"><span class="badge">单选</span><span class="badge">4 选项</span></div><div class="qtext">在人脸生成场景中，如果用户通过暗示性表达引导系统生成不当内容，服务商应如何应对？</div></div><div class="opts"><label class="opt"><input type="radio" name="q17"><div><b>A. </b>利用模型的推理机制审查指令的实质含义</div></label><label class="opt"><input type="radio" name="q17"><div><b>B. </b>鼓励用户继续尝试更有趣的表达</div></label><label class="opt"><input type="radio" name="q17"><div><b>C. </b>自动将该指令翻译成诗歌</div></label><label class="opt"><input type="radio" name="q17"><div><b>D. </b>仅对文字长度超过 100 字的指令进行审核</div></label></div><div class="actions"><button>重做</button><button>解析/提示</button></div><div class="feedback"></div><div class="detail"><div><b>提示：</b>仅看表面字眼是不够的，得理解用户到底“想干什么”。</div><div style="margin-top: 8px;"><b>解析：</b></div><div>• A：简单的关键词过滤可能失效，需要更智能的语义分析来识别潜在的违规意图。</div><div>• B：放任甚至鼓励违规内容的产生违反了服务商的安全审核义务。</div><div>• C：形式上的改变不能掩盖意图的不当，服务商必须进行实质性的内容安全管控。</div><div>• D：不当指令可能非常简短，审核机制必须覆盖所有输入，不应以字数为唯一标准。</div></div></div><div class="card hidden" data-qi="18"><div class="qhead"><div class="qno">第 19 题</div><div class="qmeta"><span class="badge">单选</span><span class="badge">4 选项</span></div><div class="qtext">当人脸识别应用者存储超过多少人的信息时，应当向网信部门备案？</div></div><div class="opts"><label class="opt"><input type="radio" name="q18"><div><b>A. </b>$1$ 万人</div></label><label class="opt"><input type="radio" name="q18"><div><b>B. </b>$100$ 人</div></label><label class="opt"><input type="radio" name="q18"><div><b>C. </b>$10$ 亿人</div></label><label class="opt"><input type="radio" name="q18"><div><b>D. </b>$0$ 人（只要有相机就需要）</div></label></div><div class="actions"><button>重做</button><button>解析/提示</button></div><div class="feedback"></div><div class="detail"><div><b>提示：</b>这是一个关于“规模化”管理的具体数字门槛。</div><div style="margin-top: 8px;"><b>解析：</b></div><div>• A：根据《人脸识别管理规定》，存储规模达到此限额即触发备案义务，以防范大规模数据风险。</div><div>• B：虽然也需保护，但法律设定的强制备案门槛通常针对规模较大的数据集。</div><div>• C：这个门槛设置得过高，会使绝大多数具有风险的应用逃避监管。 </div><div>• D：只有涉及存储一定规模的人脸敏感信息或特定公共场所应用时，才触发该特定备案义务。</div></div></div><div class="card hidden" data-qi="19"><div class="qhead"><div class="qno">第 20 题</div><div class="qmeta"><span class="badge">单选</span><span class="badge">4 选项</span></div><div class="qtext">在算法审计中，“反事实解释”的主要作用是？</div></div><div class="opts"><label class="opt"><input type="radio" name="q19"><div><b>A. </b>通过改变对应因素来测试并重现决策过程</div></label><label class="opt"><input type="radio" name="q19"><div><b>B. </b>证明算法绝对不会出错</div></label><label class="opt"><input type="radio" name="q19"><div><b>C. </b>自动将错误的决策解释为正确的</div></label><label class="opt"><input type="radio" name="q19"><div><b>D. </b>用于在愚人节时愚弄监管机构</div></label></div><div class="actions"><button>重做</button><button>解析/提示</button></div><div class="feedback"></div><div class="detail"><div><b>提示：</b>这是一种“假如当初……现在就会……”的逻辑验证方式。</div><div style="margin-top: 8px;"><b>解析：</b></div><div>• A：这种方法可以帮助验证算法是否存在歧视，通过“如果变量改变，结果会怎样”来排查风险。</div><div>• B：审计是为了发现和分析风险，而非提供一种不科学的“绝对正确”保证。</div><div>• C：解释应当反映真实逻辑，而非作为一种公关手段来粉饰算法缺陷。</div><div>• D：这是严肃的算法问责和测试技术，与娱乐活动完全无关。</div></div></div><div class="card hidden" data-qi="20"><div class="qhead"><div class="qno">第 21 题</div><div class="qmeta"><span class="badge">单选</span><span class="badge">4 选项</span></div><div class="qtext">为了防止种族或性别歧视，技术提供者在选择训练数据时应采取什么措施？</div></div><div class="opts"><label class="opt"><input type="radio" name="q20"><div><b>A. </b>保障数据的多样性和属性的统计均衡性</div></label><label class="opt"><input type="radio" name="q20"><div><b>B. </b>只选择一种特定肤色的人群进行训练</div></label><label class="opt"><input type="radio" name="q20"><div><b>C. </b>自动将所有不同特征的人脸修饰成一样的</div></label><label class="opt"><input type="radio" name="q20"><div><b>D. </b>不给标注员提供任何光线充足的图片</div></label></div><div class="actions"><button>重做</button><button>解析/提示</button></div><div class="feedback"></div><div class="detail"><div><b>提示：</b>AI 的“认知”来源于它看过的例子，如果例子太单一会怎样？</div><div style="margin-top: 8px;"><b>解析：</b></div><div>• A：均衡的数据分布能确保模型对不同群体都有准确的识别能力，减少算法偏差。</div><div>• B：这种做法会直接导致严重的算法偏见，使系统在面对其他群体时失效。</div><div>• C：抹杀特征差异会破坏模型的学习效果，无法实现真正的识别功能。</div><div>• D：低质量图片会干扰特征提取，降低模型准确性，而非解决歧视问题。</div></div></div><div class="card hidden" data-qi="21"><div class="qhead"><div class="qno">第 22 题</div><div class="qmeta"><span class="badge">单选</span><span class="badge">4 选项</span></div><div class="qtext">服务提供者应对用户上传的人脸素材履行什么保护义务？</div></div><div class="opts"><label class="opt"><input type="radio" name="q21"><div><b>A. </b>承担保密义务并防止数据泄漏或非法利用</div></label><label class="opt"><input type="radio" name="q21"><div><b>B. </b>将用户的人脸照片打印并张贴在公司外墙</div></label><label class="opt"><input type="radio" name="q21"><div><b>C. </b>在未告知用户的情况下将其用于其他产品广告</div></label><label class="opt"><input type="radio" name="q21"><div><b>D. </b>每隔一小时将数据自动发送给竞争对手</div></label></div><div class="actions"><button>重做</button><button>解析/提示</button></div><div class="feedback"></div><div class="detail"><div><b>提示：</b>这关乎用户最基本的隐私权和敏感信息安全。</div><div style="margin-top: 8px;"><b>解析：</b></div><div>• A：人脸属于敏感隐私数据，提供者必须采取技术措施确保其完整性和保密性。</div><div>• B：这属于严重的侵权行为，违反了个人信息保护法和合规义务。</div><div>• C：这种行为侵犯了用户的肖像权和隐私权，属于非法的超目的使用。</div><div>• D：这违反了基本的数据安全规范和商业诚信，属于严重违法行为。</div></div></div><div class="card hidden" data-qi="22"><div class="qhead"><div class="qno">第 23 题</div><div class="qmeta"><span class="badge">单选</span><span class="badge">4 选项</span></div><div class="qtext">在生成式 AI 中，如果技术提供者发现算法存在歧视性偏见，应当如何纠正？</div></div><div class="opts"><label class="opt"><input type="radio" name="q22"><div><b>A. </b>通过优化算法设计和调整模型权重来改善</div></label><label class="opt"><input type="radio" name="q22"><div><b>B. </b>在说明书中写明“这只是开个玩笑”</div></label><label class="opt"><input type="radio" name="q22"><div><b>C. </b>提高由于偏见受影响人群的使用费率</div></label><label class="opt"><input type="radio" name="q22"><div><b>D. </b>要求所有用户在注册时必须更换性别</div></label></div><div class="actions"><button>重做</button><button>解析/提示</button></div><div class="feedback"></div><div class="detail"><div><b>提示：</b>从算法的“心脏”——逻辑和参数入手解决问题。</div><div style="margin-top: 8px;"><b>解析：</b></div><div>• A：技术层面的偏差需要通过技术层面的迭代和调优来修正，以实现公平性。</div><div>• B：偏见会导致严重的社会后果，不能通过非正式的免责声明来逃避技术责任。</div><div>• C：这种做法会加剧不平等和歧视，是完全错误的处理方式。</div><div>• D：这无法解决底层算法的逻辑偏见，且严重干扰了真实身份信息的采集。</div></div></div><div class="card hidden" data-qi="23"><div class="qhead"><div class="qno">第 24 题</div><div class="qmeta"><span class="badge">单选</span><span class="badge">4 选项</span></div><div class="qtext">产品提供者在设置投诉反馈渠道时，对于侵权内容应当采取什么措施？</div></div><div class="opts"><label class="opt"><input type="radio" name="q23"><div><b>A. </b>依法采取删除、屏蔽、断开链接等处置</div></label><label class="opt"><input type="radio" name="q23"><div><b>B. </b>要求投诉人先支付一笔“审核手续费”</div></label><label class="opt"><input type="radio" name="q23"><div><b>C. </b>将投诉内容自动回复给被投诉的侵权者</div></label><label class="opt"><input type="radio" name="q23"><div><b>D. </b>永久禁止该投诉人再次登录该应用</div></label></div><div class="actions"><button>重做</button><button>解析/提示</button></div><div class="feedback"></div><div class="detail"><div><b>提示：</b>这是互联网平台处理争议时常用的“通知-删除”规则。</div><div style="margin-top: 8px;"><b>解析：</b></div><div>• A：及时响应并处理侵权内容是平台履行管理责任、维护用户权益的法定要求。</div><div>• B：建立维权渠道应是无障碍的，设置财务门槛会阻碍正当权益的保护。</div><div>• C：如果不加保护地转发投诉信息，可能会导致报复行为，违反了投诉处理原则。</div><div>• D：对正当维权者采取惩罚措施是本末倒置，严重违反了服务监管要求。</div></div></div><div class="card hidden" data-qi="24"><div class="qhead"><div class="qno">第 25 题</div><div class="qmeta"><span class="badge">单选</span><span class="badge">4 选项</span></div><div class="qtext">为什么在安全要求高的场景中，人脸识别不应作为唯一的身份验证方式？</div></div><div class="opts"><label class="opt"><input type="radio" name="q24"><div><b>A. </b>为了防止由于技术缺陷或伪造带来的单点失败风险</div></label><label class="opt"><input type="radio" name="q24"><div><b>B. </b>因为相机拍摄的照片总是会过期</div></label><label class="opt"><input type="radio" name="q24"><div><b>C. </b>因为法律规定每个用户必须记住十个密码</div></label><label class="opt"><input type="radio" name="q24"><div><b>D. </b>为了让用户练习记忆力</div></label></div><div class="actions"><button>重做</button><button>解析/提示</button></div><div class="feedback"></div><div class="detail"><div><b>提示：</b>考虑“不要把所有鸡蛋放在一个篮子里”的安全逻辑。</div><div style="margin-top: 8px;"><b>解析：</b></div><div>• A：多因素认证（如人脸+密码）能极大提高系统的整体安全性，防范深度伪造攻击。</div><div>• B：照片更新可以通过重新采集解决，并非不作为唯一方式的核心安全逻辑。</div><div>• C：法律不规定具体的密码数量，多因素认证是基于风险控制的技术决策。</div><div>• D：多因素验证的目标是安全加固，而非用于用户的智力测试。</div></div></div></div>
+
+  <footer class="page-footer">
+    <div class="page-footer__inner">
+      <p class="page-footer__title">继续探索这个作品</p>
+      <p class="page-footer__text">这一页聚焦 AI 人脸应用中的安全、标识和隐私边界。做完后可以回到主体网页，或者再去完成图像识别知识测验。</p>
+      <div class="page-nav__links">
+        <a class="page-link" href="../../">返回主体网页</a>
+        <a class="page-link page-link--primary" href="../image-recognition/">图像识别知识测验</a>
+      </div>
+    </div>
+  </footer>
+
+  <div class="overlay" id="overlay"></div>
+
+  <div class="side" id="side">
+    <div class="sideHead">
+      <div class="h">题目侧栏</div>
+      <div class="sp"></div>
+      <button id="closeSide">×</button>
+    </div>
+
+    <div class="tabRow">
+      <button class="tabBtn active" id="tabList">列表</button>
+      <button class="tabBtn" id="tabSettings">设置</button>
+    </div>
+
+    <div class="pane" id="paneList">
+      <div class="small">点击序号跳题（单题：切换；滚动：滚动定位）</div>
+      <div class="hr"></div>
+      <div class="grid" id="grid"><button class="qbtn ok" data-qi="0" data-pos="0" title="题号 1">1</button><button class="qbtn ok" data-qi="1" data-pos="1" title="题号 2">2</button><button class="qbtn bad active" data-qi="2" data-pos="2" title="题号 3">3</button><button class="qbtn" data-qi="3" data-pos="3" title="题号 4">4</button><button class="qbtn" data-qi="4" data-pos="4" title="题号 5">5</button><button class="qbtn" data-qi="5" data-pos="5" title="题号 6">6</button><button class="qbtn" data-qi="6" data-pos="6" title="题号 7">7</button><button class="qbtn" data-qi="7" data-pos="7" title="题号 8">8</button><button class="qbtn" data-qi="8" data-pos="8" title="题号 9">9</button><button class="qbtn" data-qi="9" data-pos="9" title="题号 10">10</button><button class="qbtn" data-qi="10" data-pos="10" title="题号 11">11</button><button class="qbtn" data-qi="11" data-pos="11" title="题号 12">12</button><button class="qbtn" data-qi="12" data-pos="12" title="题号 13">13</button><button class="qbtn" data-qi="13" data-pos="13" title="题号 14">14</button><button class="qbtn" data-qi="14" data-pos="14" title="题号 15">15</button><button class="qbtn" data-qi="15" data-pos="15" title="题号 16">16</button><button class="qbtn" data-qi="16" data-pos="16" title="题号 17">17</button><button class="qbtn" data-qi="17" data-pos="17" title="题号 18">18</button><button class="qbtn" data-qi="18" data-pos="18" title="题号 19">19</button><button class="qbtn" data-qi="19" data-pos="19" title="题号 20">20</button><button class="qbtn" data-qi="20" data-pos="20" title="题号 21">21</button><button class="qbtn" data-qi="21" data-pos="21" title="题号 22">22</button><button class="qbtn" data-qi="22" data-pos="22" title="题号 23">23</button><button class="qbtn" data-qi="23" data-pos="23" title="题号 24">24</button><button class="qbtn" data-qi="24" data-pos="24" title="题号 25">25</button></div>
+      <div class="hr"></div>
+      <div class="row">
+        <button id="prevBtn" class="pill">上一题</button>
+        <button id="nextQBtn" class="pill">下一题</button>
+      </div>
+      <div class="small" style="margin-top:10px">快捷键：<kbd>←</kbd>/<kbd>→</kbd>（单题） <kbd>L</kbd> 列表 <kbd>S</kbd> 设置 <kbd>M</kbd> 模式</div>
+    </div>
+
+    <div class="pane" id="paneSettings" style="display:none">
+      <div class="row">
+        <div class="lab">模式</div>
+        <select class="ctrl" id="modeSel">
+          <option value="single">单题翻页</option>
+          <option value="scroll">滚动多题</option>
+        </select>
+      </div>
+
+      <div class="row" style="margin-top:10px">
+        <div class="lab">解析显示</div>
+        <select class="ctrl" id="explainSel">
+          <option value="auto">自动（错题/手动）</option>
+          <option value="always">总是显示</option>
+          <option value="never">从不显示</option>
+        </select>
+      </div>
+
+      <div class="row" style="margin-top:10px">
+        <div class="lab">单选</div>
+        <label class="row" style="gap:8px">
+          <input id="autoCheck" type="checkbox">
+          <span class="small">点选自动判分</span>
+        </label>
+      </div>
+
+      <div class="row" style="margin-top:10px">
+        <div class="lab">筛选</div>
+        <select class="ctrl" id="filterSel">
+          <option value="all">全部</option>
+          <option value="todo">未做</option>
+          <option value="wrong">错题</option>
+        </select>
+      </div>
+
+      <div class="hr"></div>
+
+      <div class="row">
+        <button id="shuffleBtn" class="pill">打乱题序</button>
+        <button id="restoreBtn" class="pill">恢复顺序</button>
+      </div>
+
+      <div class="row" style="margin-top:10px">
+        <button id="resetAllBtn" class="pill">重置全部</button>
+      </div>
+
+      <div class="hr"></div>
+
+      <div class="small">提示：解析/提示按钮可单题展开；快捷键 <kbd>S</kbd> 直接开设置。</div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" style="display: none;">跳到下一未做</div>
+
+  <script id="nlmq_data" type="application/json">{"meta":{"exportedAt":"2026-04-07T13:58:54.718Z","pageUrl":"","pageTitle":"人脸合规测验","notebookId":"","captureUrl":"","quizTitle":"人脸合规测验"},"quiz":[{"question":"在人脸生成合成生态中，谁应对训练数据来源的合法性承担主要责任？","hint":"考虑在人工智能开发链条中，哪一方直接接触并处理原始数据集。","answerOptions":[{"text":"技术提供者","isCorrect":true,"rationale":"作为算法和模型的研发方，技术提供者直接负责数据的采集与处理，是数据合规的源头责任人。"},{"text":"最终消费者","isCorrect":false,"rationale":"普通用户通常只是产品的使用者，不参与模型的训练数据筛选过程。"},{"text":"广告运营商","isCorrect":false,"rationale":"广告方仅是生成内容的应用场景之一，不决定底层训练数据的合法性。"},{"text":"硬件设备生产商","isCorrect":false,"rationale":"硬件商提供计算基础，而训练数据的合规性属于软件与数据治理的范畴。"}]},{"question":"根据合规要求，添加“隐性标识”的主要目的是什么？","hint":"这种标识通常对肉眼不可见，主要用于安全追踪。","answerOptions":[{"text":"确保内容的识别与追溯","isCorrect":true,"rationale":"隐性标识（如数字水印）能够在不影响视觉效果的情况下，记录生成信息以便后续核查。"},{"text":"提升人脸图像的清晰度","isCorrect":false,"rationale":"标识属于安全管理手段，并不具备优化图像像素或视觉质量的功能。"},{"text":"自动为用户添加滤镜","isCorrect":false,"rationale":"滤镜属于娱乐化功能，而隐性标识是法律规定的合规技术手段。"},{"text":"减少文件占用的存储空间","isCorrect":false,"rationale":"添加标识信息通常会略微增加数据量，而非进行数据压缩。"}]},{"question":"在人脸生成合成场景下，对于可能导致公众混淆的非真实视频，应当采取哪种标识？","hint":"为了让观众一眼认出这是 AI 生成的内容，需要这种标识。","answerOptions":[{"text":"显著标识（显性标识）","isCorrect":true,"rationale":"为了防止公众产生误认，必须在生成的图像或视频的合理位置进行清晰的标注。"},{"text":"临时删除标签","isCorrect":false,"rationale":"删除标识会增加欺诈和误导风险，违反了生成式内容的合规原则。"},{"text":"仅存储在元数据中","isCorrect":false,"rationale":"仅在元数据中标记无法起到提醒普通观众的作用，不足以防范公众混淆。"},{"text":"加密压缩标识","isCorrect":false,"rationale":"加密是为了安全传输，而标识的目的是为了让公众一眼看清内容的生成属性。"}]},{"question":"对于提供人脸美颜修饰功能的合成服务，是否必须添加显著标识？","hint":"考虑这种功能是否会让人误以为图片中的人是一个完全不存在的“拟真人物”。","answerOptions":[{"text":"不需要，因为它属于低风险场景且影响用户体验","isCorrect":true,"rationale":"美颜修饰通常不会引起公众对真实身份的误认，合规上允许根据风险等级区分对待。"},{"text":"必须添加，所有 AI 处理过的图像都需显著标注","isCorrect":false,"rationale":"法律要求通常针对可能引起误导的高风险场景，并非一刀切地要求所有功能。"},{"text":"仅在光线暗的情况下需要","isCorrect":false,"rationale":"合规标识的要求取决于功能性质和风险等级，而非环境光照条件。"},{"text":"只有收费版本才需要添加","isCorrect":false,"rationale":"安全合规义务与收费模式无关，而是基于保护公众知情权和预防风险。"}]},{"question":"技术提供者在算法安全评估中，应当定期审核哪项机制？","hint":"关注算法本身的工作原理和它可能产生的社会影响。","answerOptions":[{"text":"生成合成类算法机制机理的正当性","isCorrect":true,"rationale":"定期审核算法机理有助于确保系统运行符合伦理标准并预防生成不良内容。"},{"text":"用户的个人财务报表","isCorrect":false,"rationale":"企业无需且无权审核用户的个人财务隐私，这不属于算法安全评估范畴。"},{"text":"硬件服务器的折旧率","isCorrect":false,"rationale":"硬件管理属于企业行政管理，不属于针对算法合规性的专项评估。"},{"text":"竞争对手的市场占有率","isCorrect":false,"rationale":"市场调研与算法的安全性及正当性审核没有直接的法律关联。"}]},{"question":"深度合成服务提供者在提供人脸编辑功能时，必须履行哪项义务？","hint":"处理像人脸这样的敏感信息，最核心的合规要求是什么？","answerOptions":[{"text":"提示用户依法取得被编辑人的单独同意","isCorrect":true,"rationale":"人脸属于敏感个人信息，法律要求在编辑他人人脸时必须获得其明确授权。"},{"text":"强制用户上传所有通讯录信息","isCorrect":false,"rationale":"这种行为超出了必要性原则，属于非法过度收集个人信息。"},{"text":"要求用户支付额外的安全保证金","isCorrect":false,"rationale":"安全合规是企业的法定责任，不应通过向用户收取保证金来替代。"},{"text":"禁止用户在白天使用该功能","isCorrect":false,"rationale":"合规管理旨在确保过程安全，而非对用户的使用时间进行无理限制。"}]},{"question":"在人脸生成算法的训练过程中，采取“去标识化”措施的主要作用是？","hint":"想想在处理大量包含真人面部的数据时，法律最关心什么。","answerOptions":[{"text":"保护训练数据中的个人隐私","isCorrect":true,"rationale":"通过删除或隐藏能够识别特定个人的标识符，可以降低训练数据泄露带来的风险。"},{"text":"加快模型的计算速度","isCorrect":false,"rationale":"去标识化是安全措施，对算法执行效率的提升作用有限。"},{"text":"增加图像的像素深度","isCorrect":false,"rationale":"这是数据处理层面的操作，与图像本身的物理参数（如像素）无关。"},{"text":"为了让标注员更辛苦","isCorrect":false,"rationale":"去标识化是为了合规与安全，而非人为增加工作难度。"}]},{"question":"生成式 AI 产品服务提供者应当如何处理用户输入的违规指令？","hint":"这是预防“输入端”风险的关键技术步骤。","answerOptions":[{"text":"通过敏感词筛查或逻辑识别进行过滤","isCorrect":true,"rationale":"利用技术手段拦截不当指令，可以从源头上预防系统生成不良或违法内容。"},{"text":"自动将违规指令发给该用户的社交好友","isCorrect":false,"rationale":"这种行为侵犯了用户的通信秘密，且无法解决合规性问题。"},{"text":"将指令翻译成外语后再执行","isCorrect":false,"rationale":"翻译无法改变指令的实质违规性，仍会导致不良内容的产生。"},{"text":"直接无视，由系统自动生成随机图片","isCorrect":false,"rationale":"消极应对无法履行审核义务，服务商必须主动识别并拦截违规请求。"}]},{"question":"当 AI 系统发现已经生成了不符合法律要求的图片时，除了过滤内容，还应怎么做？","hint":"考虑如何让系统从错误中“学习”，以避免重蹈覆辙。","answerOptions":[{"text":"通过模型优化训练防止再次生成","isCorrect":true,"rationale":"通过反馈循环改进模型，可以从根本上减少未来产生类似违规内容的概率。"},{"text":"给该用户发送促销礼券以示安慰","isCorrect":false,"rationale":"违规内容的处理应侧重于技术修正和合规管理，而非市场营销手段。"},{"text":"提高该图片在搜索结果中的权重","isCorrect":false,"rationale":"增加违规内容的曝光度会加重法律责任，违反了安全评估的基本原则。"},{"text":"强制关停所有用户的服务器","isCorrect":false,"rationale":"这种做法反应过度，合规要求的是针对特定问题的精准治理与模型改进。"}]},{"question":"算法备案制度的主要目的是什么？","hint":"这是一种行政告知机制，旨在让监管者了解“黑盒”里的逻辑。","answerOptions":[{"text":"实现算法透明化以便政府监督","isCorrect":true,"rationale":"备案属于告知式管理，为监管机构提供必要信息，以评估算法的合规性与安全性。"},{"text":"为企业颁发行政许可证书","isCorrect":false,"rationale":"备案不同于行政许可，它不代表政府对算法性能的官方担保。"},{"text":"限制企业的市场竞争能力","isCorrect":false,"rationale":"备案是为了安全治理，而非出于打压企业竞争或限制商业发展的目的。"},{"text":"代替企业内部的安全测试","isCorrect":false,"rationale":"外部备案不能取代企业的内部自评估和安全测试，两者是互补关系。"}]},{"question":"技术提供者在训练数据人工标注过程中，为什么要制定统一的标注规则？","hint":"如果每个人对图片的标注标准都不一样，训练出来的 AI 会怎样？","answerOptions":[{"text":"保证算法模型的准确性和一致性","isCorrect":true,"rationale":"统一的规则能减少标注偏差，确保模型学习到的是客观、高质量的视觉规律。"},{"text":"为了让不同标注员互相竞争","isCorrect":false,"rationale":"规则是为了标准化输出，而非通过竞赛机制来管理员工。"},{"text":"防止标注员在工作时听音乐","isCorrect":false,"rationale":"规则内容关注的是数据标注的技术标准，不涉及具体的办公室纪律。"},{"text":"因为国家要求所有文档格式必须一样","isCorrect":false,"rationale":"核心原因是模型训练对数据质量的要求，而非单纯的格式审美需求。"}]},{"question":"在生成合成结果的审核中，“黑白名单”机制通常如何运作？","hint":"这是一种常见的用于分类过滤的技术过滤手段。","answerOptions":[{"text":"自动屏蔽名单中的违规内容并放行合规内容","isCorrect":true,"rationale":"这是一种提高审核效率的技术手段，通过预设规则实现大部分内容的自动化处理。"},{"text":"将所有黑头发的用户加入黑名单","isCorrect":false,"rationale":"这属于严重的歧视行为，违背了算法公平性和伦理原则。"},{"text":"白名单用户不需要遵守任何法律","isCorrect":false,"rationale":"法律对所有主体具有普适性，名单机制仅用于流程加速，不豁免法律责任。"},{"text":"黑名单是指无法连接网络的用户","isCorrect":false,"rationale":"在内容审核语境下，黑名单针对的是违规的内容类别或特征标识。"}]},{"question":"为了防止“自动化偏差”，服务提供者应当在人脸识别系统中加入什么？","hint":"当机器可能犯错或过度自信时，谁应该来最后把关？","answerOptions":[{"text":"人工干预和监督工具","isCorrect":true,"rationale":"由人类介入监督可以纠正算法的盲目依赖，确保最终决策的合理性与责任归属。"},{"text":"自动关机计时器","isCorrect":false,"rationale":"偏差是指决策逻辑的问题，定时关机无法从根本上纠正算法的偏见。"},{"text":"更多的广告弹窗","isCorrect":false,"rationale":"广告会干扰系统运行，与算法的鲁棒性及监督管理目标背道而驰。"},{"text":"自动增加对比度的插件","isCorrect":false,"rationale":"这属于图像处理改进，无法解决算法在决策逻辑上的偏差风险。"}]},{"question":"在人脸识别产业中，“守门人”义务通常适用于哪类主体？","hint":"想一想谁拥有掌控第三方 APP 接入和分发的“权力”。","answerOptions":[{"text":"大型平台型应用及分发平台","isCorrect":true,"rationale":"由于控制了流量入口和技术环境，这些主体有责任监管接入的第三方应用是否合规。"},{"text":"购买云服务的个人开发者","isCorrect":false,"rationale":"个人开发者通常不具备管控行业生态的能力，不属于“守门人”定义的范围。"},{"text":"打印店的老板","isCorrect":false,"rationale":"“守门人”是指数字生态中的关键节点，普通线下小微企业不承担此类义务。"},{"text":"专门负责打扫机房的人员","isCorrect":false,"rationale":"守门人职责是指对技术环境和运营条款的管控能力，而非物理意义上的值守。"}]},{"question":"算法透明度义务要求技术提供者公示哪些信息？","hint":"关注那些能影响用户对 AI 结果产生“信任”的技术参数。","answerOptions":[{"text":"预训练数据的来源、规模和质量描述","isCorrect":true,"rationale":"公开这些信息有助于建立用户信任，并让监管方评估模型的潜在偏见与局限性。"},{"text":"首席执行官的家庭住址","isCorrect":false,"rationale":"算法透明度关注的是技术逻辑和数据基础，而非企业管理层的个人隐私。"},{"text":"公司内部的所有商业合同金额","isCorrect":false,"rationale":"财务细节属于商业机密，不属于旨在保障用户知情权的算法透明度范畴。"},{"text":"每个员工的咖啡偏好","isCorrect":false,"rationale":"这与算法的安全评估、逻辑解释及合规性完全没有关联。"}]},{"question":"如果技术提供者使用“合成数据”进行模型训练，应当采取什么措施？","hint":"为了保证 AI 不会在假数据里“跑偏”，需要一种校准手段。","answerOptions":[{"text":"将其与真实数据模型进行比较以验证准确性","isCorrect":true,"rationale":"由于合成数据可能偏离现实，必须通过与真实场景对比来确保模型的泛化能力。"},{"text":"禁止在说明文档中提到使用了合成数据","isCorrect":false,"rationale":"隐瞒数据来源违反了透明度原则，且不利于后续的风险评估。"},{"text":"确保合成数据里的所有人物都戴着墨镜","isCorrect":false,"rationale":"这种人为限制会破坏数据的多样性，导致模型在处理真实面部时失效。"},{"text":"自动将合成数据的版权赠送给政府","isCorrect":false,"rationale":"合规要求关注的是数据的准确性和安全性，不涉及版权赠与的法律强制。"}]},{"question":"人脸识别算法备案中的“行政告知式”意味着什么？","hint":"备案和审批的区别在于，它更像是一种“打招呼”而非“拿执照”。","answerOptions":[{"text":"备案不设定权利，仅为政府提供监管信息基础","isCorrect":true,"rationale":"这种备案的目的是信息对称，而非通过行政手段赋予企业特定的经营权。"},{"text":"只要备案了，企业就可以免受任何法律追究","isCorrect":false,"rationale":"备案只是合规程序的一部分，不能作为违法行为的“免死金牌”。"},{"text":"政府必须为备案成功的企业提供补贴","isCorrect":false,"rationale":"备案是企业的法定合规义务，与政府的产业激励政策没有必然联系。"},{"text":"备案信息只能用书信方式邮寄","isCorrect":false,"rationale":"“告知式”是指备案的法律性质，而非具体的递交媒介或通信手段。"}]},{"question":"在人脸生成场景中，如果用户通过暗示性表达引导系统生成不当内容，服务商应如何应对？","hint":"仅看表面字眼是不够的，得理解用户到底“想干什么”。","answerOptions":[{"text":"利用模型的推理机制审查指令的实质含义","isCorrect":true,"rationale":"简单的关键词过滤可能失效，需要更智能的语义分析来识别潜在的违规意图。"},{"text":"鼓励用户继续尝试更有趣的表达","isCorrect":false,"rationale":"放任甚至鼓励违规内容的产生违反了服务商的安全审核义务。"},{"text":"自动将该指令翻译成诗歌","isCorrect":false,"rationale":"形式上的改变不能掩盖意图的不当，服务商必须进行实质性的内容安全管控。"},{"text":"仅对文字长度超过 100 字的指令进行审核","isCorrect":false,"rationale":"不当指令可能非常简短，审核机制必须覆盖所有输入，不应以字数为唯一标准。"}]},{"question":"当人脸识别应用者存储超过多少人的信息时，应当向网信部门备案？","hint":"这是一个关于“规模化”管理的具体数字门槛。","answerOptions":[{"text":"$1$ 万人","isCorrect":true,"rationale":"根据《人脸识别管理规定》，存储规模达到此限额即触发备案义务，以防范大规模数据风险。"},{"text":"$100$ 人","isCorrect":false,"rationale":"虽然也需保护，但法律设定的强制备案门槛通常针对规模较大的数据集。"},{"text":"$10$ 亿人","isCorrect":false,"rationale":"这个门槛设置得过高，会使绝大多数具有风险的应用逃避监管。 "},{"text":"$0$ 人（只要有相机就需要）","isCorrect":false,"rationale":"只有涉及存储一定规模的人脸敏感信息或特定公共场所应用时，才触发该特定备案义务。"}]},{"question":"在算法审计中，“反事实解释”的主要作用是？","hint":"这是一种“假如当初……现在就会……”的逻辑验证方式。","answerOptions":[{"text":"通过改变对应因素来测试并重现决策过程","isCorrect":true,"rationale":"这种方法可以帮助验证算法是否存在歧视，通过“如果变量改变，结果会怎样”来排查风险。"},{"text":"证明算法绝对不会出错","isCorrect":false,"rationale":"审计是为了发现和分析风险，而非提供一种不科学的“绝对正确”保证。"},{"text":"自动将错误的决策解释为正确的","isCorrect":false,"rationale":"解释应当反映真实逻辑，而非作为一种公关手段来粉饰算法缺陷。"},{"text":"用于在愚人节时愚弄监管机构","isCorrect":false,"rationale":"这是严肃的算法问责和测试技术，与娱乐活动完全无关。"}]},{"question":"为了防止种族或性别歧视，技术提供者在选择训练数据时应采取什么措施？","hint":"AI 的“认知”来源于它看过的例子，如果例子太单一会怎样？","answerOptions":[{"text":"保障数据的多样性和属性的统计均衡性","isCorrect":true,"rationale":"均衡的数据分布能确保模型对不同群体都有准确的识别能力，减少算法偏差。"},{"text":"只选择一种特定肤色的人群进行训练","isCorrect":false,"rationale":"这种做法会直接导致严重的算法偏见，使系统在面对其他群体时失效。"},{"text":"自动将所有不同特征的人脸修饰成一样的","isCorrect":false,"rationale":"抹杀特征差异会破坏模型的学习效果，无法实现真正的识别功能。"},{"text":"不给标注员提供任何光线充足的图片","isCorrect":false,"rationale":"低质量图片会干扰特征提取，降低模型准确性，而非解决歧视问题。"}]},{"question":"服务提供者应对用户上传的人脸素材履行什么保护义务？","hint":"这关乎用户最基本的隐私权和敏感信息安全。","answerOptions":[{"text":"承担保密义务并防止数据泄漏或非法利用","isCorrect":true,"rationale":"人脸属于敏感隐私数据，提供者必须采取技术措施确保其完整性和保密性。"},{"text":"将用户的人脸照片打印并张贴在公司外墙","isCorrect":false,"rationale":"这属于严重的侵权行为，违反了个人信息保护法和合规义务。"},{"text":"在未告知用户的情况下将其用于其他产品广告","isCorrect":false,"rationale":"这种行为侵犯了用户的肖像权和隐私权，属于非法的超目的使用。"},{"text":"每隔一小时将数据自动发送给竞争对手","isCorrect":false,"rationale":"这违反了基本的数据安全规范和商业诚信，属于严重违法行为。"}]},{"question":"在生成式 AI 中，如果技术提供者发现算法存在歧视性偏见，应当如何纠正？","hint":"从算法的“心脏”——逻辑和参数入手解决问题。","answerOptions":[{"text":"通过优化算法设计和调整模型权重来改善","isCorrect":true,"rationale":"技术层面的偏差需要通过技术层面的迭代和调优来修正，以实现公平性。"},{"text":"在说明书中写明“这只是开个玩笑”","isCorrect":false,"rationale":"偏见会导致严重的社会后果，不能通过非正式的免责声明来逃避技术责任。"},{"text":"提高由于偏见受影响人群的使用费率","isCorrect":false,"rationale":"这种做法会加剧不平等和歧视，是完全错误的处理方式。"},{"text":"要求所有用户在注册时必须更换性别","isCorrect":false,"rationale":"这无法解决底层算法的逻辑偏见，且严重干扰了真实身份信息的采集。"}]},{"question":"产品提供者在设置投诉反馈渠道时，对于侵权内容应当采取什么措施？","hint":"这是互联网平台处理争议时常用的“通知-删除”规则。","answerOptions":[{"text":"依法采取删除、屏蔽、断开链接等处置","isCorrect":true,"rationale":"及时响应并处理侵权内容是平台履行管理责任、维护用户权益的法定要求。"},{"text":"要求投诉人先支付一笔“审核手续费”","isCorrect":false,"rationale":"建立维权渠道应是无障碍的，设置财务门槛会阻碍正当权益的保护。"},{"text":"将投诉内容自动回复给被投诉的侵权者","isCorrect":false,"rationale":"如果不加保护地转发投诉信息，可能会导致报复行为，违反了投诉处理原则。"},{"text":"永久禁止该投诉人再次登录该应用","isCorrect":false,"rationale":"对正当维权者采取惩罚措施是本末倒置，严重违反了服务监管要求。"}]},{"question":"为什么在安全要求高的场景中，人脸识别不应作为唯一的身份验证方式？","hint":"考虑“不要把所有鸡蛋放在一个篮子里”的安全逻辑。","answerOptions":[{"text":"为了防止由于技术缺陷或伪造带来的单点失败风险","isCorrect":true,"rationale":"多因素认证（如人脸+密码）能极大提高系统的整体安全性，防范深度伪造攻击。"},{"text":"因为相机拍摄的照片总是会过期","isCorrect":false,"rationale":"照片更新可以通过重新采集解决，并非不作为唯一方式的核心安全逻辑。"},{"text":"因为法律规定每个用户必须记住十个密码","isCorrect":false,"rationale":"法律不规定具体的密码数量，多因素认证是基于风险控制的技术决策。"},{"text":"为了让用户练习记忆力","isCorrect":false,"rationale":"多因素验证的目标是安全加固，而非用于用户的智力测试。"}]}],"config":{"mode":"single","explain":"auto","autoCheckSingle":true},"generator":{"name":"NotebookLM Quiz Exporter Pro","version":"1.4.1"}}</script>
+  <script>
+const DATA = JSON.parse(document.getElementById("nlmq_data").textContent);
+const quiz = Array.isArray(DATA.quiz) ? DATA.quiz : [];
+const cfg = DATA.config || {};
+const meta = DATA.meta || {};
+const $ = (sel, root=document) => root.querySelector(sel);
+const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+const letter = (i)=>String.fromCharCode(65+i);
+
+const settings = {
+  mode: cfg.mode === "scroll" ? "scroll" : "single",
+  explain: cfg.explain === "always" || cfg.explain === "never" ? cfg.explain : "auto",
+  autoCheckSingle: !!cfg.autoCheckSingle,
+  filter: "all",
+  order: quiz.map((_, i)=>i),
+  currentPos: 0,
+  sideTab: "list"
+};
+
+const qState = quiz.map(()=>({ checked:false, correct:false, selected:[], shownDetail:false }));
+
+function toast(msg){
+  const t = $("#toast");
+  t.textContent = msg;
+  t.style.display = "block";
+  clearTimeout(t._t);
+  t._t = setTimeout(()=> t.style.display="none", 1600);
+}
+
+function correctIdxs(q){
+  const opts = Array.isArray(q.answerOptions) ? q.answerOptions : [];
+  return opts.map((o,i)=>o && o.isCorrect ? i : -1).filter(i=>i>=0);
+}
+
+function computeStats(){
+  const checked = qState.filter(s=>s.checked).length;
+  const correct = qState.filter(s=>s.checked && s.correct).length;
+  return { total: quiz.length, checked, correct };
+}
+
+function updateTop(){
+  const { total, checked, correct } = computeStats();
+  $("#stat").textContent = "已判分 " + checked + "/" + total + " · 正确 " + correct;
+  const pct = total ? Math.round((checked/total)*100) : 0;
+  $("#bar").style.width = pct + "%";
+  $("#modeBtn").textContent = settings.mode === "single" ? "单题" : "滚动";
+}
+
+function applyFilterToCards(){
+  if (settings.mode !== "scroll") return;
+  const filter = settings.filter;
+  $$(".card").forEach(card=>{
+    const qi = parseInt(card.getAttribute("data-qi"), 10);
+    const st = qState[qi];
+    let show = true;
+    if (filter === "todo") show = !st.checked;
+    else if (filter === "wrong") show = st.checked && !st.correct;
+    card.classList.toggle("hidden", !show);
+  });
+}
+
+function activeQi(){
+  return settings.order[settings.currentPos] ?? 0;
+}
+
+function topOffset(){
+  const top = document.querySelector(".top");
+  const h = top ? top.offsetHeight : 0;
+  return Math.max(0, h + 10);
+}
+
+function scrollToCard(card){
+  const r = card.getBoundingClientRect();
+  const y = window.scrollY + r.top - topOffset();
+  window.scrollTo({ top: Math.max(0, y), behavior: "smooth" });
+}
+
+function showPos(pos){
+  const max = settings.order.length;
+  settings.currentPos = Math.max(0, Math.min(max-1, pos));
+  const qi = activeQi();
+
+  if (settings.mode === "single") {
+    $$(".card").forEach(c=>{
+      const cqi = parseInt(c.getAttribute("data-qi"), 10);
+      c.classList.toggle("hidden", cqi !== qi);
+    });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  } else {
+    const card = document.querySelector('.card[data-qi="'+qi+'"]');
+    if (card) scrollToCard(card);
+  }
+
+  updateSideActive(qi);
+}
+
+function next(delta){
+  showPos(settings.currentPos + delta);
+}
+
+function nextTodo(){
+  for (let p=0;p<settings.order.length;p++){
+    const qi = settings.order[p];
+    if (!qState[qi].checked){
+      showPos(p);
+      toast("跳到下一未做");
+      return;
+    }
+  }
+  toast("已全部判分");
+}
+
+function setMode(m){
+  settings.mode = (m === "scroll") ? "scroll" : "single";
+  if (settings.mode === "scroll") {
+    $$(".card").forEach(c=>c.classList.remove("hidden"));
+    applyFilterToCards();
+    toast("切换：滚动多题");
+  } else {
+    showPos(settings.currentPos);
+    toast("切换：单题翻页");
+  }
+  updateTop();
+}
+
+function setExplainMode(m){
+  settings.explain = (m === "always" || m === "never") ? m : "auto";
+  $$(".card").forEach(card=>{
+    const qi = parseInt(card.getAttribute("data-qi"), 10);
+    applyDetailPolicy(qi);
+  });
+  toast("解析显示：" + (settings.explain === "always" ? "总是" : settings.explain === "never" ? "从不" : "自动"));
+}
+
+function applyDetailPolicy(qi){
+  const card = document.querySelector('.card[data-qi="'+qi+'"]');
+  if (!card) return;
+  const det = card.querySelector(".detail");
+  const st = qState[qi];
+  if (settings.explain === "never") det.classList.remove("show");
+  else if (settings.explain === "always") det.classList.add("show");
+  else {
+    const show = st.shownDetail || (st.checked && !st.correct);
+    det.classList.toggle("show", !!show);
+  }
+}
+
+function setAutoCheckSingle(on){
+  settings.autoCheckSingle = !!on;
+  toast("单选自动判分：" + (settings.autoCheckSingle ? "开" : "关"));
+}
+
+function selectedIdxs(qi){
+  const card = document.querySelector('.card[data-qi="'+qi+'"]');
+  if (!card) return [];
+  const inputs = Array.from(card.querySelectorAll('input[name="q'+qi+'"]'));
+  const sel = [];
+  inputs.forEach((inp, i)=>{ if (inp.checked) sel.push(i); });
+  return sel;
+}
+
+function setDisabled(qi, disabled){
+  const card = document.querySelector('.card[data-qi="'+qi+'"]');
+  if (!card) return;
+  Array.from(card.querySelectorAll('input[name="q'+qi+'"]')).forEach(inp=> inp.disabled = disabled);
+}
+
+function clearMarks(qi){
+  const card = document.querySelector('.card[data-qi="'+qi+'"]');
+  if (!card) return;
+  card.querySelectorAll(".opt").forEach(o=> o.classList.remove("correct","wrong"));
+  const fb = card.querySelector(".feedback");
+  fb.className = "feedback";
+  fb.textContent = "";
+}
+
+function mark(qi, ok, corr){
+  const card = document.querySelector('.card[data-qi="'+qi+'"]');
+  if (!card) return;
+  const opts = Array.from(card.querySelectorAll(".opt"));
+  opts.forEach((el, i)=>{ if (corr.includes(i)) el.classList.add("correct"); });
+  qState[qi].selected.forEach(i=>{ if (!corr.includes(i)) opts[i]?.classList.add("wrong"); });
+
+  const fb = card.querySelector(".feedback");
+  fb.classList.add(ok ? "good" : "bad");
+  const corrLetters = corr.length ? corr.map(letter).join(", ") : "（未标注）";
+  fb.textContent = ok ? "✅ 正确" : ("❌ 错误（正确答案：" + corrLetters + "）");
+}
+
+function evaluate(qi){
+  const q = quiz[qi];
+  const corr = correctIdxs(q);
+  const sel = selectedIdxs(qi);
+  qState[qi].selected = sel;
+
+  clearMarks(qi);
+
+  const card = document.querySelector('.card[data-qi="'+qi+'"]');
+  if (!card) return;
+
+  if (!corr.length) {
+    const fb = card.querySelector(".feedback");
+    fb.classList.add("bad");
+    fb.textContent = "⚠️ 该题未标注答案，无法判分";
+    qState[qi].checked = true;
+    qState[qi].correct = false;
+    updateTop(); updateSideItem(qi); applyDetailPolicy(qi);
+    return;
+  }
+
+  if (!sel.length) {
+    toast("请先选择一个选项");
+    return;
+  }
+
+  const ok = sel.length === corr.length && sel.every(i=>corr.includes(i));
+  qState[qi].checked = true;
+  qState[qi].correct = ok;
+  if (!ok && settings.explain !== "never") qState[qi].shownDetail = true;
+
+  mark(qi, ok, corr);
+  setDisabled(qi, true);
+
+  applyDetailPolicy(qi);
+  updateTop();
+  updateSideItem(qi);
+  if (settings.mode === "single") updateSideActive(qi);
+}
+
+function resetOne(qi){
+  const card = document.querySelector('.card[data-qi="'+qi+'"]');
+  if (!card) return;
+  Array.from(card.querySelectorAll('input[name="q'+qi+'"]')).forEach(inp=>{ inp.checked=false; inp.disabled=false; });
+  qState[qi] = { checked:false, correct:false, selected:[], shownDetail:false };
+  clearMarks(qi);
+  applyDetailPolicy(qi);
+  updateTop();
+  updateSideItem(qi);
+}
+
+function resetAll(){
+  quiz.forEach((_, qi)=> resetOne(qi));
+  toast("已重置全部题目");
+}
+
+function toggleDetail(qi){
+  const card = document.querySelector('.card[data-qi="'+qi+'"]');
+  if (!card) return;
+  const det = card.querySelector(".detail");
+  const willShow = !det.classList.contains("show");
+  if (settings.explain === "never" && willShow) {
+    settings.explain = "auto";
+    $("#explainSel").value = "auto";
+  }
+  qState[qi].shownDetail = willShow;
+  applyDetailPolicy(qi);
+}
+
+function syncSelectedClass(card, qi){
+  const labels = Array.from(card.querySelectorAll(".opt"));
+  const inputs = Array.from(card.querySelectorAll('input[name="q'+qi+'"]'));
+  labels.forEach((lab, i)=>{
+    const on = !!inputs[i]?.checked;
+    lab.classList.toggle("selected", on);
+  });
+}
+
+function buildCard(qi){
+  const q = quiz[qi];
+  const corr = correctIdxs(q);
+  const multi = corr.length > 1;
+  const type = multi ? "checkbox" : "radio";
+
+  const card = document.createElement("div");
+  card.className = "card";
+  card.setAttribute("data-qi", String(qi));
+
+  const head = document.createElement("div");
+  head.className = "qhead";
+
+  const left = document.createElement("div");
+  left.className = "qno";
+  left.textContent = "第 " + (qi+1) + " 题";
+
+  const metaRow = document.createElement("div");
+  metaRow.className = "qmeta";
+  const badgeType = document.createElement("span");
+  badgeType.className = "badge";
+  badgeType.textContent = multi ? "多选" : "单选";
+  const badgeCnt = document.createElement("span");
+  badgeCnt.className = "badge";
+  badgeCnt.textContent = (Array.isArray(q.answerOptions) ? q.answerOptions.length : 0) + " 选项";
+  metaRow.appendChild(badgeType);
+  metaRow.appendChild(badgeCnt);
+
+  const qt = document.createElement("div");
+  qt.className = "qtext";
+  qt.textContent = q.question || "";
+
+  head.appendChild(left);
+  head.appendChild(metaRow);
+  head.appendChild(qt);
+  card.appendChild(head);
+
+  const optsWrap = document.createElement("div");
+  optsWrap.className = "opts";
+
+  const opts = Array.isArray(q.answerOptions) ? q.answerOptions : [];
+  opts.forEach((o, oi)=>{
+    const lab = document.createElement("label");
+    lab.className = "opt";
+
+    const inp = document.createElement("input");
+    inp.type = type;
+    inp.name = "q" + qi;
+
+    const txt = document.createElement("div");
+    const b = document.createElement("b");
+    b.textContent = letter(oi) + ". ";
+    txt.appendChild(b);
+    txt.appendChild(document.createTextNode(o?.text || ""));
+
+    lab.appendChild(inp);
+    lab.appendChild(txt);
+    optsWrap.appendChild(lab);
+
+    inp.addEventListener("change", ()=>{
+      syncSelectedClass(card, qi);
+      if (!multi && settings.autoCheckSingle && !qState[qi].checked) evaluate(qi);
+    });
+  });
+
+  card.appendChild(optsWrap);
+
+  const actions = document.createElement("div");
+  actions.className = "actions";
+
+  if (!(settings.mode === "single" && !multi)) {
+    const btnCheck = document.createElement("button");
+    btnCheck.textContent = multi ? "提交" : "检查";
+    btnCheck.addEventListener("click", ()=> evaluate(qi));
+    actions.appendChild(btnCheck);
+  }
+
+  const btnReset = document.createElement("button");
+  btnReset.textContent = "重做";
+  btnReset.addEventListener("click", ()=> resetOne(qi));
+
+  const btnDetail = document.createElement("button");
+  btnDetail.textContent = "解析/提示";
+  btnDetail.addEventListener("click", ()=> toggleDetail(qi));
+
+  actions.appendChild(btnReset);
+  actions.appendChild(btnDetail);
+  card.appendChild(actions);
+
+  const fb = document.createElement("div");
+  fb.className = "feedback";
+  card.appendChild(fb);
+
+  const det = document.createElement("div");
+  det.className = "detail";
+
+  const hasHint = !!q.hint;
+  const anyR = opts.some(x=>x?.rationale);
+
+  if (hasHint) {
+    const h = document.createElement("div");
+    const hb = document.createElement("b");
+    hb.textContent = "提示：";
+    h.appendChild(hb);
+    h.appendChild(document.createTextNode(q.hint));
+    det.appendChild(h);
+  }
+
+  if (anyR) {
+    const t = document.createElement("div");
+    t.style.marginTop = "8px";
+    const tb = document.createElement("b");
+    tb.textContent = "解析：";
+    t.appendChild(tb);
+    det.appendChild(t);
+
+    opts.forEach((o, oi)=>{
+      if (!o?.rationale) return;
+      const r = document.createElement("div");
+      r.textContent = "• " + letter(oi) + "：" + o.rationale;
+      det.appendChild(r);
+    });
+  }
+
+  if (!hasHint && !anyR) {
+    const none = document.createElement("div");
+    none.textContent = "（本题无提示/解析）";
+    det.appendChild(none);
+  }
+
+  card.appendChild(det);
+
+  const st = qState[qi];
+  if (st.checked) {
+    Array.from(card.querySelectorAll('input[name="q'+qi+'"]')).forEach((inp, i)=>{
+      inp.checked = st.selected.includes(i);
+      inp.disabled = true;
+    });
+    syncSelectedClass(card, qi);
+    clearMarks(qi);
+    mark(qi, st.correct, corr);
+  } else {
+    syncSelectedClass(card, qi);
+  }
+
+  applyDetailPolicy(qi);
+  return card;
+}
+
+function buildMain(){
+  const main = $("#main");
+  main.innerHTML = "";
+  settings.order.forEach(qi=> main.appendChild(buildCard(qi)));
+  if (settings.mode === "single") showPos(settings.currentPos);
+  else applyFilterToCards();
+  updateSideGrid();
+  updateTop();
+}
+
+function updateSideItem(qi){
+  const btn = document.querySelector('.qbtn[data-qi="'+qi+'"]');
+  if (!btn) return;
+  btn.classList.remove("todo","ok","bad");
+  const st = qState[qi];
+  if (!st.checked) btn.classList.add("todo");
+  else if (st.correct) btn.classList.add("ok");
+  else btn.classList.add("bad");
+}
+
+function updateSideGrid(){
+  const grid = $("#grid");
+  grid.innerHTML = "";
+  settings.order.forEach((qi, pos)=>{
+    const b = document.createElement("button");
+    b.className = "qbtn";
+    b.setAttribute("data-qi", String(qi));
+    b.setAttribute("data-pos", String(pos));
+    b.textContent = String(pos+1);
+    b.title = "题号 " + (qi+1);
+
+    updateSideItem(qi);
+
+    b.addEventListener("click", ()=>{
+      settings.currentPos = pos;
+      showPos(pos);
+      closeSide();
+    });
+
+    grid.appendChild(b);
+  });
+  updateSideActive(activeQi());
+}
+
+function updateSideActive(qi){
+  $$(".qbtn").forEach(b=> b.classList.remove("active"));
+  const btn = document.querySelector('.qbtn[data-qi="'+qi+'"]');
+  if (btn) btn.classList.add("active");
+}
+
+function openSide(tab){
+  if (tab === "settings" || tab === "list") settings.sideTab = tab;
+  $("#overlay").classList.add("show");
+  $("#side").classList.add("open");
+  setSideTab(settings.sideTab);
+}
+
+function closeSide(){
+  $("#overlay").classList.remove("show");
+  $("#side").classList.remove("open");
+}
+
+function setSideTab(tab){
+  settings.sideTab = tab === "settings" ? "settings" : "list";
+  $("#tabList").classList.toggle("active", settings.sideTab === "list");
+  $("#tabSettings").classList.toggle("active", settings.sideTab === "settings");
+  $("#paneList").style.display = settings.sideTab === "list" ? "block" : "none";
+  $("#paneSettings").style.display = settings.sideTab === "settings" ? "block" : "none";
+}
+
+function shuffleOrder(){
+  const arr = quiz.map((_, i)=>i);
+  for (let i=arr.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  settings.order = arr;
+  settings.currentPos = 0;
+  buildMain();
+  toast("已打乱题序");
+}
+
+function restoreOrder(){
+  settings.order = quiz.map((_, i)=>i);
+  settings.currentPos = 0;
+  buildMain();
+  toast("已恢复原始题序");
+}
+
+function init(){
+  const title = meta.quizTitle || meta.pageTitle || "Quiz";
+  const subtitle = "认识 AI 人脸生成、人脸识别以及真实场景中的合规边界。";
+  $("#titleT").textContent = title;
+  $("#titleS").textContent = subtitle;
+
+  $("#modeBtn").addEventListener("click", ()=> setMode(settings.mode === "single" ? "scroll" : "single"));
+  $("#sideBtn").addEventListener("click", ()=> openSide("list"));
+  $("#nextBtn").addEventListener("click", ()=> nextTodo());
+  $("#prevBtn").addEventListener("click", ()=> next(-1));
+  $("#nextQBtn").addEventListener("click", ()=> next(1));
+
+  $("#overlay").addEventListener("click", closeSide);
+  $("#closeSide").addEventListener("click", closeSide);
+
+  $("#tabList").addEventListener("click", ()=> setSideTab("list"));
+  $("#tabSettings").addEventListener("click", ()=> setSideTab("settings"));
+
+  $("#modeSel").value = settings.mode;
+  $("#modeSel").addEventListener("change", (e)=> setMode(e.target.value));
+
+  $("#explainSel").value = settings.explain;
+  $("#explainSel").addEventListener("change", (e)=> setExplainMode(e.target.value));
+
+  $("#autoCheck").checked = settings.autoCheckSingle;
+  $("#autoCheck").addEventListener("change", (e)=> setAutoCheckSingle(e.target.checked));
+
+  $("#filterSel").value = settings.filter;
+  $("#filterSel").addEventListener("change", (e)=>{
+    settings.filter = e.target.value || "all";
+    applyFilterToCards();
+    toast("筛选：" + (settings.filter === "all" ? "全部" : settings.filter === "todo" ? "未做" : "错题"));
+  });
+
+  $("#shuffleBtn").addEventListener("click", shuffleOrder);
+  $("#restoreBtn").addEventListener("click", restoreOrder);
+  $("#resetAllBtn").addEventListener("click", resetAll);
+
+  document.addEventListener("keydown", (e)=>{
+    if (e.key === "Escape") closeSide();
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+
+    const tag = (e.target && e.target.tagName) ? e.target.tagName.toLowerCase() : "";
+    const inInput = tag === "input" || tag === "textarea" || tag === "select";
+
+    if (!inInput && e.key.toLowerCase() === "l") openSide("list");
+    if (!inInput && e.key.toLowerCase() === "s") openSide("settings");
+    if (!inInput && e.key.toLowerCase() === "m") setMode(settings.mode === "single" ? "scroll" : "single");
+
+    if (settings.mode === "single" && !inInput) {
+      if (e.key === "ArrowLeft") next(-1);
+      if (e.key === "ArrowRight") next(1);
+      if (e.key.toLowerCase() === "n") next(1);
+      if (e.key.toLowerCase() === "p") next(-1);
+    }
+  });
+
+  buildMain();
+  updateTop();
+  toast("快捷键：L 列表 · S 设置 · M 模式 · 单题用 ←/→");
+}
+
+init();
+</script>
+
+</body></html>
+

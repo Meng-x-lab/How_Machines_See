@@ -1,0 +1,791 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>图像识别知识测验</title>
+<link rel="stylesheet" href="../../assets/css/common.css">
+<link rel="stylesheet" href="../../assets/css/quiz-theme.css">
+<style>
+:root{--bg:#0b0c0f;--panel:#101223;--card:#141729;--fg:#e9e9ee;--muted:#a6a8b3;--line:#2a2f48;--good:#2ecc71;--bad:#ff5c5c;--accent:#6aa4ff;--btn:#1b2036;--btn2:#151a2c;--shadow:0 18px 48px rgba(0,0,0,.35);--r:14px}
+@media (prefers-color-scheme: light){:root{--bg:#f6f7fb;--panel:#ffffff;--card:#ffffff;--fg:#111;--muted:#555;--line:#e7e9f0;--good:#1e9e53;--bad:#d83b3b;--accent:#2e6cff;--btn:#f1f3fa;--btn2:#eef1f9;--shadow:0 18px 48px rgba(17,17,17,.12)}}
+*{box-sizing:border-box;writing-mode:inherit;text-orientation:inherit}
+html,body{margin:0;padding:0;min-height:100%;background:var(--bg);color:var(--fg);font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;line-height:1.35;writing-mode:horizontal-tb !important;text-orientation:mixed !important;direction:ltr !important}
+a{color:inherit}
+button,select,input,textarea{font:inherit;writing-mode:horizontal-tb !important;text-orientation:mixed !important;direction:ltr !important}
+button,select{background:var(--btn);color:var(--fg);border:1px solid var(--line);border-radius:12px;padding:8px 10px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+button:hover,select:hover{filter:brightness(1.03)}
+button:active{transform:translateY(1px)}
+button:disabled{opacity:.6;cursor:not-allowed;transform:none}
+kbd{font-size:12px;padding:2px 6px;border:1px solid var(--line);border-radius:8px;background:var(--btn2);color:var(--muted)}
+
+.top{position:sticky;top:0;z-index:20;background:color-mix(in srgb, var(--bg) 88%, transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.topin{max-width:980px;margin:0 auto;padding:10px 12px;display:flex;flex-direction:column;gap:10px}
+.toprow{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.brand{display:flex;gap:10px;align-items:center;min-width:0;flex:1 1 420px}
+.logo{width:34px;height:34px;border-radius:12px;background:linear-gradient(135deg, color-mix(in srgb, var(--accent) 75%, transparent), color-mix(in srgb, var(--good) 40%, transparent));border:1px solid var(--line);flex:0 0 auto}
+.title{display:flex;flex-direction:column;gap:2px;min-width:0}
+.title .t{font-weight:850;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.title .s{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.actionsTop{display:flex;gap:8px;align-items:center;flex:0 1 auto;flex-wrap:wrap;justify-content:flex-end}
+.pill{border-radius:999px;padding:8px 12px}
+.toprow2{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.progress{flex:1 1 520px;height:10px;border-radius:999px;border:1px solid var(--line);overflow:hidden;background:var(--btn2);min-width:220px}
+.progress .bar{height:100%;width:0%;background:linear-gradient(90deg,var(--accent),color-mix(in srgb, var(--accent) 60%, var(--good)))}
+.stat{font-size:12px;color:var(--muted);white-space:nowrap;flex:0 0 auto}
+
+.main{max-width:980px;margin:0 auto;padding:14px 12px 76px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px;margin-top:12px}
+.card.hidden{display:none}
+
+.qhead{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:start}
+.qno{font-weight:950;line-height:1.1;padding-top:1px}
+.qmeta{display:flex;gap:8px;align-items:center;flex-wrap:wrap;color:var(--muted);font-size:12px}
+.badge{border:1px solid var(--line);border-radius:999px;padding:2px 8px;background:var(--btn2)}
+.qtext{grid-column:1 / -1;font-weight:760;line-height:1.55;margin-top:2px;text-indent:2em;word-break:break-word}
+
+.opts{margin-top:12px;display:grid;gap:10px}
+.opt{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:color-mix(in srgb, var(--card) 88%, transparent);transition:transform .05s ease, filter .05s ease, border-color .12s ease, box-shadow .12s ease}
+.opt:hover{filter:brightness(1.02)}
+.opt:active{transform:translateY(1px)}
+.opt input{margin-top:2px;flex:0 0 auto}
+.opt.selected{border-color:color-mix(in srgb, var(--accent) 45%, var(--line));box-shadow:0 0 0 2px color-mix(in srgb, var(--accent) 18%, transparent) inset}
+.opt.correct{border-color:color-mix(in srgb, var(--good) 75%, var(--line));box-shadow:0 0 0 2px color-mix(in srgb, var(--good) 18%, transparent) inset}
+.opt.wrong{border-color:color-mix(in srgb, var(--bad) 80%, var(--line));box-shadow:0 0 0 2px color-mix(in srgb, var(--bad) 16%, transparent) inset}
+
+.actions{margin-top:12px;display:flex;gap:10px;flex-wrap:wrap}
+.feedback{margin-top:10px;font-weight:850}
+.feedback.good{color:var(--good)}
+.feedback.bad{color:var(--bad)}
+.detail{margin-top:10px;color:var(--muted);font-size:13px;line-height:1.65;display:none;word-break:break-word}
+.detail.show{display:block}
+
+.hr{height:1px;background:var(--line);margin:10px 0}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:14px;z-index:60;max-width:calc(100vw - 24px);background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:10px 14px;box-shadow:var(--shadow);font-size:13px;color:var(--fg);display:none}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);opacity:0;pointer-events:none;transition:opacity .16s ease;z-index:39}
+.overlay.show{opacity:1;pointer-events:auto}
+.side{position:fixed;top:0;right:0;height:100vh;width:340px;max-width:92vw;background:var(--panel);border-left:1px solid var(--line);transform:translateX(100%);transition:transform .16s ease;z-index:40;display:flex;flex-direction:column;box-shadow:var(--shadow)}
+.side.open{transform:translateX(0)}
+.sideHead{padding:12px;border-bottom:1px solid var(--line);display:flex;gap:10px;align-items:center}
+.sideHead .h{font-weight:850}
+.sideHead .sp{flex:1}
+.tabRow{padding:10px 12px;display:flex;gap:8px}
+.tabBtn{flex:1;border-radius:12px;background:var(--btn2)}
+.tabBtn.active{background:var(--btn);border-color:color-mix(in srgb, var(--accent) 30%, var(--line))}
+.pane{padding:12px;overflow:auto}
+.grid{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}
+.qbtn{border-radius:12px;padding:10px 0;text-align:center;border:1px solid var(--line);background:var(--btn2);color:var(--fg);user-select:none}
+.qbtn.todo{opacity:.85}
+.qbtn.ok{border-color:color-mix(in srgb, var(--good) 55%, var(--line));box-shadow:0 0 0 2px color-mix(in srgb, var(--good) 14%, transparent) inset}
+.qbtn.bad{border-color:color-mix(in srgb, var(--bad) 55%, var(--line));box-shadow:0 0 0 2px color-mix(in srgb, var(--bad) 14%, transparent) inset}
+.qbtn.active{outline:2px solid color-mix(in srgb, var(--accent) 55%, transparent);outline-offset:1px}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.row .lab{min-width:92px;color:var(--muted);font-size:12px}
+.row .ctrl{flex:1 1 auto;min-width:160px}
+.small{font-size:12px;color:var(--muted)}
+.foot{max-width:980px;margin:0 auto;padding:0 12px 22px;color:var(--muted);font-size:12px}
+@media (max-width: 540px){.grid{grid-template-columns:repeat(5,1fr)}}
+</style>
+<body class="page-quiz page-quiz--image">
+  <header class="page-nav">
+    <div class="page-nav__inner">
+      <a class="page-brand" href="../../">
+        <img src="../../assets/images/logo.png" alt="机器识图乐园徽标">
+        <span>机器识图乐园</span>
+      </a>
+      <nav class="page-nav__links" aria-label="页面跳转">
+        <a class="page-link" href="../../">返回主体网页</a>
+        <a class="page-link page-link--accent" href="../face-compliance/">跳转到人脸合规测验</a>
+      </nav>
+    </div>
+  </header>
+  <div class="top">
+    <div class="topin">
+      <div class="toprow">
+        <div class="brand">
+          <img src="../../assets/images/logo.png" alt="机器识图乐园徽标" width="50" height="50">
+          <div class="title" title="图像识别知识测验">
+            <div class="t" id="titleT">图像识别知识测验</div>
+            <div class="s" id="titleS">从像素、特征到分类器，边做题边复习图像识别基础。</div>
+          </div>
+        </div>
+        <div class="actionsTop">
+          <button class="pill" id="modeBtn" title="切换模式 (M)">单题</button>
+          <button class="pill" id="nextBtn" title="下一未做">下一未做</button>
+          <button class="pill" id="sideBtn" title="打开侧栏 (L)">侧栏</button>
+        </div>
+      </div>
+      <div class="toprow2">
+        <div class="progress" aria-label="progress">
+          <div class="bar" id="bar" style="width: 8%;"></div>
+        </div>
+        <div class="stat" id="stat">已判分 2/26 · 正确 2</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="main" id="main"><div class="card hidden" data-qi="0"><div class="qhead"><div class="qno">第 1 题</div><div class="qmeta"><span class="badge">单选</span><span class="badge">4 选项</span></div><div class="qtext">在计算机中，一张数字图像最基本的组成单位是什么？</div></div><div class="opts"><label class="opt selected correct"><input type="radio" name="q0" disabled=""><div><b>A. </b>像素</div></label><label class="opt"><input type="radio" name="q0" disabled=""><div><b>B. </b>矢量图</div></label><label class="opt"><input type="radio" name="q0" disabled=""><div><b>C. </b>传感器</div></label><label class="opt"><input type="radio" name="q0" disabled=""><div><b>D. </b>神经元</div></label></div><div class="actions"><button>重做</button><button>解析/提示</button></div><div class="feedback good">✅ 正确</div><div class="detail"><div><b>提示：</b>它通常被描述为构成数字画面微小格子的“点”。</div><div style="margin-top: 8px;"><b>解析：</b></div><div>• A：数字图像是由像素组成的网格，每个像素包含描述颜色和亮度的数值。</div><div>• B：矢量图是一种图像类型，而不是组成数字图像的基本数据点单位。</div><div>• C：传感器是捕捉图像的硬件设备，而非数字图像本身的组成数据单位。</div><div>• D：神经元是神经网络模型中的基本计算单元，不是构成原始图像文件的基本像素点。</div></div></div><div class="card" data-qi="1"><div class="qhead"><div class="qno">第 2 题</div><div class="qmeta"><span class="badge">单选</span><span class="badge">4 选项</span></div><div class="qtext">对于人工智能模型来说，它看到的图像本质上是什么？</div></div><div class="opts"><label class="opt"><input type="radio" name="q1" disabled=""><div><b>A. </b>真实的风景或物体</div></label><label class="opt selected correct"><input type="radio" name="q1" disabled=""><div><b>B. </b>庞大的数字矩阵</div></label><label class="opt"><input type="radio" name="q1" disabled=""><div><b>C. </b>一种特定的声音信号</div></label><label class="opt"><input type="radio" name="q1" disabled=""><div><b>D. </b>带有情感的视觉记忆</div></label></div><div class="actions"><button>重做</button><button>解析/提示</button></div><div class="feedback good">✅ 正确</div><div class="detail show"><div><b>提示：</b>计算机是通过数学计算来处理所有信息的。</div><div style="margin-top: 8px;"><b>解析：</b></div><div>• A：机器并不理解现实世界中的宏观物体，它只能处理其底层表示形式。</div><div>• B：模型将像素信息转换为数值格式，通过数学矩阵来解读颜色和亮度的分布。</div><div>• C：虽然声音也可以数字化，但图像识别处理的核心数据结构是针对视觉像素的。</div><div>• D：人工智能目前尚不具备人类那样的情感理解，它基于统计关系学习模式。</div></div></div><div class="card hidden" data-qi="2"><div class="qhead"><div class="qno">第 3 题</div><div class="qmeta"><span class="badge">单选</span><span class="badge">4 选项</span></div><div class="qtext">在图像识别的预处理阶段，将图像调整为统一的分辨率是为了解决什么问题？</div></div><div class="opts"><label class="opt"><input type="radio" name="q2"><div><b>A. </b>消除图像中的偏见</div></label><label class="opt"><input type="radio" name="q2"><div><b>B. </b>确保模型输入的形状一致</div></label><label class="opt"><input type="radio" name="q2"><div><b>C. </b>增加图像的艺术感</div></label><label class="opt"><input type="radio" name="q2"><div><b>D. </b>完全替换原有的像素值</div></label></div><div class="actions"><button>重做</button><button>解析/提示</button></div><div class="feedback"></div><div class="detail"><div><b>提示：</b>想想如果每个零件的大小都不一样，工厂的流水线还能正常工作吗？</div><div style="margin-top: 8px;"><b>解析：</b></div><div>• A：偏见通常源于数据分布不均，而尺寸调整属于格式标准化操作。</div><div>• B：模型通常需要固定大小的输入张量，以便进行后续的矩阵运算和特征提取。</div><div>• C：预处理的目标是提高机器的可读性，而非从人类审美角度改善画质。</div><div>• D：尺寸调整是缩放原图信息，而不是丢弃原有视觉内容并用全新内容替换。</div></div></div><div class="card hidden" data-qi="3"><div class="qhead"><div class="qno">第 4 题</div><div class="qmeta"><span class="badge">单选</span><span class="badge">4 选项</span></div><div class="qtext">在图像处理中，“去噪”这一步骤的主要目的是什么？</div></div><div class="opts"><label class="opt"><input type="radio" name="q3"><div><b>A. </b>减少传感器噪声等视觉失真</div></label><label class="opt"><input type="radio" name="q3"><div><b>B. </b>将彩色图像变成黑白图像</div></label><label class="opt"><input type="radio" name="q3"><div><b>C. </b>给图像添加背景音乐</div></label><label class="opt"><input type="radio" name="q3"><div><b>D. </b>识别出图中所有人的名字</div></label></div><div class="actions"><button>重做</button><button>解析/提示</button></div><div class="feedback"></div><div class="detail"><div><b>提示：</b>当你在一张模糊或满是雪花点的照片中找人时，你会希望照片变清晰一点。</div><div style="margin-top: 8px;"><b>解析：</b></div><div>• A：去噪能清除干扰细节的像素杂质，使模型更容易检测到边缘和形状。</div><div>• B：这是灰度化处理，去噪是针对图像中随机干扰点的清理。</div><div>• C：图像识别技术仅处理视觉信息，不涉及音频合成。</div><div>• D：识别名字是推理层的任务，去噪属于更早期的准备工作阶段。</div></div></div><div class="card hidden" data-qi="4"><div class="qhead"><div class="qno">第 5 题</div><div class="qmeta"><span class="badge">单选</span><span class="badge">4 选项</span></div><div class="qtext">在机器识别图像的过程中，通常最先被识别出来的简单特征是什么？</div></div><div class="opts"><label class="opt"><input type="radio" name="q4"><div><b>A. </b>物体的完整轮廓</div></label><label class="opt"><input type="radio" name="q4"><div><b>B. </b>边缘、角点和颜色渐变</div></label><label class="opt"><input type="radio" name="q4"><div><b>C. </b>物体的用途和分类</div></label><label class="opt"><input type="radio" name="q4"><div><b>D. </b>图像拍摄的时间地点</div></label></div><div class="actions"><button>重做</button><button>解析/提示</button></div><div class="feedback"></div><div class="detail"><div><b>提示：</b>想象一下画简笔画时，你动笔画下的第一根线条。</div><div style="margin-top: 8px;"><b>解析：</b></div><div>• A：完整轮廓是由更基础的视觉元素在更深的层次组合而成的。</div><div>• B：神经网络的早期层倾向于检测这些非常简单的局部模式。</div><div>• C：理解物体的语义含义是图像识别的最终结果，而不是初始阶段检测的内容。</div><div>• D：这通常属于元数据信息，不属于通过像素分析得出的基本视觉特征。</div></div></div><div class="card hidden" data-qi="5"><div class="qhead"><div class="qno">第 6 题</div><div class="qmeta"><span class="badge">单选</span><span class="badge">4 选项</span></div><div class="qtext">卷积神经网络 (CNN) 中的“卷积”运算有什么核心作用？</div></div><div class="opts"><label class="opt"><input type="radio" name="q5"><div><b>A. </b>让同一模式检测器可应用于整幅图像</div></label><label class="opt"><input type="radio" name="q5"><div><b>B. </b>直接决定图像的最终标签</div></label><label class="opt"><input type="radio" name="q5"><div><b>C. </b>将图像的分辨率提高一倍</div></label><label class="opt"><input type="radio" name="q5"><div><b>D. </b>删除图像中所有的红色像素</div></label></div><div class="actions"><button>重做</button><button>解析/提示</button></div><div class="feedback"></div><div class="detail"><div><b>提示：</b>即使一个边缘在图片的左边或右边，它依然是一个边缘。</div><div style="margin-top: 8px;"><b>解析：</b></div><div>• A：卷积运算利用小型滤波器扫描图像，使模型能高效、稳健地学习可重用的视觉模式。</div><div>• B：卷积仅负责提取特征，标签的分配通常由最后的分类层决定。</div><div>• C：卷积通常会提取关键特征，有时甚至会通过步长设置降低特征图尺寸，而非提高原图分辨率。</div><div>• D：卷积是加权求和运算，用于提取特征，并非单纯的颜色过滤操作。</div></div></div><div class="card hidden" data-qi="6"><div class="qhead"><div class="qno">第 7 题</div><div class="qmeta"><span class="badge">单选</span><span class="badge">4 选项</span></div><div class="qtext">在机器学习中，所谓的“监督学习”主要依赖于什么？</div></div><div class="opts"><label class="opt"><input type="radio" name="q6"><div><b>A. </b>人类标记的带标签数据</div></label><label class="opt"><input type="radio" name="q6"><div><b>B. </b>机器随机生成的图像</div></label><label class="opt"><input type="radio" name="q6"><div><b>C. </b>不包含任何答案的原始数据</div></label><label class="opt"><input type="radio" name="q6"><div><b>D. </b>硬件设备的运算速度</div></label></div><div class="actions"><button>重做</button><button>解析/提示</button></div><div class="feedback"></div><div class="detail"><div><b>提示：</b>就像学生做带有标准答案的习题集。</div><div style="margin-top: 8px;"><b>解析：</b></div><div>• A：监督学习通过展示大量已知正确答案的示例（如标记为“汽车”的图片）来教会模型。</div><div>• B：随机数据缺乏正确的引导信息，无法作为有效的监督信号。</div><div>• C：没有正确答案的数据通常用于非监督学习，通过寻找相似性进行聚类。</div><div>• D：运算速度影响训练效率，但监督学习的本质在于学习“标签”与“特征”的对应关系。</div></div></div><div class="card hidden" data-qi="7"><div class="qhead"><div class="qno">第 8 题</div><div class="qmeta"><span class="badge">单选</span><span class="badge">4 选项</span></div><div class="qtext">非监督学习在图像识别中的一个典型应用场景是什么？</div></div><div class="opts"><label class="opt"><input type="radio" name="q7"><div><b>A. </b>根据相似性将不同形状的积木归类分组</div></label><label class="opt"><input type="radio" name="q7"><div><b>B. </b>精准识别出一张照片里是哪种水果</div></label><label class="opt"><input type="radio" name="q7"><div><b>C. </b>对违章车辆的车牌进行自动扣分</div></label><label class="opt"><input type="radio" name="q7"><div><b>D. </b>在人脸识别中匹配数据库中的特定用户</div></label></div><div class="actions"><button>重做</button><button>解析/提示</button></div><div class="feedback"></div><div class="detail"><div><b>提示：</b>这种方式更像是让机器自己去发现数据中的内在规律，而不是给它答案。</div><div style="margin-top: 8px;"><b>解析：</b></div><div>• A：非监督学习通过扫描特征寻找相似性进行聚类，无需预先知道每个组的名称。</div><div>• B：这需要明确的分类标签，属于典型的监督学习任务。</div><div>• C：法律判断和精准识别需要高度确定的分类规则，主要依赖监督学习。</div><div>• D：匹配已知身份属于分类或对比任务，通常涉及已有的身份标签。</div></div></div><div class="card hidden" data-qi="8"><div class="qhead"><div class="qno">第 9 题</div><div class="qmeta"><span class="badge">单选</span><span class="badge">4 选项</span></div><div class="qtext">在人脸识别技术中，“活体检测”步骤的主要目的是什么？</div></div><div class="opts"><label class="opt"><input type="radio" name="q8"><div><b>A. </b>识别出用户脸上是否有皱纹</div></label><label class="opt"><input type="radio" name="q8"><div><b>B. </b>验证是否为真实活体本人在操作</div></label><label class="opt"><input type="radio" name="q8"><div><b>C. </b>测量用户的心跳和血压</div></label><label class="opt"><input type="radio" name="q8"><div><b>D. </b>计算用户照片的文件大小</div></label></div><div class="actions"><button>重做</button><button>解析/提示</button></div><div class="feedback"></div><div class="detail"><div><b>提示：</b>这是为了防止坏人拿一张你的照片来冒充你解锁手机。</div><div style="margin-top: 8px;"><b>解析：</b></div><div>• A：识别细微特征属于图像分析，但活体检测关注的是身份的真实性来源。</div><div>• B：通过眨眼、摇头等动作判断操作者是真人，而非照片或视频翻拍，以防伪造攻击。</div><div>• C：虽然某些特殊设备可以做到，但标准的人脸识别活体检测侧重于防欺骗。</div><div>• D：文件大小是底层存储属性，与验证用户是否为真人没有直接逻辑关系。</div></div></div><div class="card hidden" data-qi="9"><div class="qhead"><div class="qno">第 10 题</div><div class="qmeta"><span class="badge">单选</span><span class="badge">4 选项</span></div><div class="qtext">图像识别模型中的“特征提取”是指什么过程？</div></div><div class="opts"><label class="opt"><input type="radio" name="q9"><div><b>A. </b>把图像中所有多余的信息都删除</div></label><label class="opt"><input type="radio" name="q9"><div><b>B. </b>获取研究对象本身具有的代表性属性</div></label><label class="opt"><input type="radio" name="q9"><div><b>C. </b>将一张图片拆分成几千张小碎片</div></label><label class="opt"><input type="radio" name="q9"><div><b>D. </b>提高图像的亮度使其更清晰</div></label></div><div class="actions"><button>重做</button><button>解析/提示</button></div><div class="feedback"></div><div class="detail"><div><b>提示：</b>就像人类通过“长脖子”和“斑点”来分辨长颈鹿一样。</div><div style="margin-top: 8px;"><b>解析：</b></div><div>• A：这说法过于绝对，特征提取是提取有用的关键信息，而非简单的全删除。</div><div>• B：它是通过分析像素，获得如颜色、形状、纹理等能将不同类别区分开的特征。</div><div>• C：这是物理分割，而特征提取是数学上的属性抽象过程。</div><div>• D：这属于预处理中的增强操作，特征提取是对增强后结果的更深层分析。</div></div></div><div class="card hidden" data-qi="10"><div class="qhead"><div class="qno">第 11 题</div><div class="qmeta"><span class="badge">单选</span><span class="badge">4 选项</span></div><div class="qtext">如果一个图像识别模型在训练集中表现极好，但在没见过的照片上表现很差，这通常意味着什么？</div></div><div class="opts"><label class="opt"><input type="radio" name="q10"><div><b>A. </b>该模型已经变得太聪明了</div></label><label class="opt"><input type="radio" name="q10"><div><b>B. </b>模型仅仅是记住了训练集而非学会了通用模式</div></label><label class="opt"><input type="radio" name="q10"><div><b>C. </b>电脑硬件需要更换显卡</div></label><label class="opt"><input type="radio" name="q10"><div><b>D. </b>输入的测试照片分辨率太低</div></label></div><div class="actions"><button>重做</button><button>解析/提示</button></div><div class="feedback"></div><div class="detail"><div><b>提示：</b>就像一个只会死记硬背的学生，遇到稍微变型的题目就不会做了。</div><div style="margin-top: 8px;"><b>解析：</b></div><div>• A：这通常是模型泛化能力不足的表现，而非智能水平的提升。</div><div>• B：这种现象称为过拟合，模型过度学习了特定样本的细节，无法应对新的变化。</div><div>• C：性能下降通常源于算法训练策略或数据质量，而非单纯的硬件故障。</div><div>• D：虽然分辨率有影响，但这种“反差”表现的核心问题在于模型的适应性不足。</div></div></div><div class="card hidden" data-qi="11"><div class="qhead"><div class="qno">第 12 题</div><div class="qmeta"><span class="badge">单选</span><span class="badge">4 选项</span></div><div class="qtext">在图像分类任务中，模型最终输出的是什么？</div></div><div class="opts"><label class="opt"><input type="radio" name="q11"><div><b>A. </b>图像中物体的具体像素坐标</div></label><label class="opt"><input type="radio" name="q11"><div><b>B. </b>一个属于某个类别的概率分布或标签</div></label><label class="opt"><input type="radio" name="q11"><div><b>C. </b>一段对图像内容的文字描述</div></label><label class="opt"><input type="radio" name="q11"><div><b>D. </b>一张完全相同的备份图片</div></label></div><div class="actions"><button>重做</button><button>解析/提示</button></div><div class="feedback"></div><div class="detail"><div><b>提示：</b>它通常会告诉你有 $95\%$ 的可能性这是一只猫。</div><div style="margin-top: 8px;"><b>解析：</b></div><div>• A：输出具体位置通常是目标检测的任务，分类只关注图像所属的类别。</div><div>• B：分类器根据提取的特征，判断图像最可能属于哪一个预定义的类别。</div><div>• C：这是图像描述 (Image Captioning) 的任务，简单的分类只输出特定的类别标签。</div><div>• D：图像识别的目标是提取含义，而不是进行简单的文件复制。</div></div></div><div class="card hidden" data-qi="12"><div class="qhead"><div class="qno">第 13 题</div><div class="qmeta"><span class="badge">单选</span><span class="badge">4 选项</span></div><div class="qtext">为什么高质量的“标注数据”被认为是图像识别的基础？</div></div><div class="opts"><label class="opt"><input type="radio" name="q12"><div><b>A. </b>因为它能让图片文件占用的空间变小</div></label><label class="opt"><input type="radio" name="q12"><div><b>B. </b>因为它告诉模型应该从图像中学习什么</div></label><label class="opt"><input type="radio" name="q12"><div><b>C. </b>因为它能自动修复拍摄时的抖动</div></label><label class="opt"><input type="radio" name="q12"><div><b>D. </b>因为它能提高显卡的运算功率</div></label></div><div class="actions"><button>重做</button><button>解析/提示</button></div><div class="feedback"></div><div class="detail"><div><b>提示：</b>如果没有老师告诉你什么是对的，你很难从错误的例子中学习。</div><div style="margin-top: 8px;"><b>解析：</b></div><div>• A：标注信息通常会增加额外的元数据开销，并不会减小图片体积。</div><div>• B：每个标签都是正确的参考信号，低质量的标注会导致模型学习到错误的统计关系。</div><div>• C：修复抖动是预处理算法的功能，标注是提供监督信号的过程。</div><div>• D：标注数据影响的是算法的逻辑学习，而非硬件的物理功率。</div></div></div><div class="card hidden" data-qi="13"><div class="qhead"><div class="qno">第 14 题</div><div class="qmeta"><span class="badge">单选</span><span class="badge">4 选项</span></div><div class="qtext">“迁移学习”在图像识别开发中为什么非常流行？</div></div><div class="opts"><label class="opt"><input type="radio" name="q13"><div><b>A. </b>因为它不需要任何计算力</div></label><label class="opt"><input type="radio" name="q13"><div><b>B. </b>可以利用已学到的通用视觉特征来加速新任务的学习</div></label><label class="opt"><input type="radio" name="q13"><div><b>C. </b>因为它可以让模型自动拥有情感</div></label><label class="opt"><input type="radio" name="q13"><div><b>D. </b>因为它可以跳过所有的预处理步骤</div></label></div><div class="actions"><button>重做</button><button>解析/提示</button></div><div class="feedback"></div><div class="detail"><div><b>提示：</b>这就像一个已经学会画画的人，学习画新的物体会比零基础的人快得多。</div><div style="margin-top: 8px;"><b>解析：</b></div><div>• A：微调过程依然需要一定的计算资源，只是相比从零开始大大减少了。</div><div>• B：通过使用在大型数据集上训练好的预训练模型，可以在数据较少时也达到较好效果。</div><div>• C：迁移学习传输的是视觉模式特征提取能力，不涉及情感等高级心理属性。</div><div>• D：预训练模型通常对输入有特定的格式要求，预处理步骤依然必不可少。</div></div></div><div class="card hidden" data-qi="14"><div class="qhead"><div class="qno">第 15 题</div><div class="qmeta"><span class="badge">单选</span><span class="badge">4 选项</span></div><div class="qtext">图像识别中的“分类器设计”指的是什么？</div></div><div class="opts"><label class="opt"><input type="radio" name="q14"><div><b>A. </b>选择性能最强的电脑主机</div></label><label class="opt"><input type="radio" name="q14"><div><b>B. </b>通过训练得到一种识别规则</div></label><label class="opt"><input type="radio" name="q14"><div><b>C. </b>手动在每张图片上画圈标记</div></label><label class="opt"><input type="radio" name="q14"><div><b>D. </b>把彩色照片转换成黑白格式</div></label></div><div class="actions"><button>重做</button><button>解析/提示</button></div><div class="feedback"></div><div class="detail"><div><b>提示：</b>这是制定一套让机器判断“它是谁”的逻辑标准。</div><div style="margin-top: 8px;"><b>解析：</b></div><div>• A：这属于硬件选型，而分类器设计是算法逻辑层面的构建。</div><div>• B：设计分类器是为了使系统能根据特征空间将对象划分到正确的类别中。</div><div>• C：这属于人工标注或数据准备阶段，不是分类器本身的算法设计。</div><div>• D：这是预处理中的色域转换，与分类决策逻辑的设计无关。</div></div></div><div class="card hidden" data-qi="15"><div class="qhead"><div class="qno">第 16 题</div><div class="qmeta"><span class="badge">单选</span><span class="badge">4 选项</span></div><div class="qtext">在现实世界中，光照变化对图像识别模型会有什么影响？</div></div><div class="opts"><label class="opt"><input type="radio" name="q15"><div><b>A. </b>完全没有任何影响</div></label><label class="opt"><input type="radio" name="q15"><div><b>B. </b>可能会干扰像素值导致识别错误</div></label><label class="opt"><input type="radio" name="q15"><div><b>C. </b>能让模型运行速度变快</div></label><label class="opt"><input type="radio" name="q15"><div><b>D. </b>会自动纠正错误的标签</div></label></div><div class="actions"><button>重做</button><button>解析/提示</button></div><div class="feedback"></div><div class="detail"><div><b>提示：</b>想想你在全黑的房间里还能轻松认出你的朋友吗？机器也面临类似的困难。</div><div style="margin-top: 8px;"><b>解析：</b></div><div>• A：环境因素是现实世界中导致模型性能不稳定的主要原因之一。</div><div>• B：光照会改变颜色的数值表示和对比度，如果模型不够鲁棒，会由于像素值的巨大波动而失效。</div><div>• C：运行速度由模型复杂度和硬件决定，外部光照不直接改变计算耗时。</div><div>• D：标签是训练时固定的，光照只会作为输入噪声影响模型的推理判断。</div></div></div><div class="card hidden" data-qi="16"><div class="qhead"><div class="qno">第 17 题</div><div class="qmeta"><span class="badge">单选</span><span class="badge">4 选项</span></div><div class="qtext">人工智能图像识别与人类“看见”物体的本质区别在于？</div></div><div class="opts"><label class="opt"><input type="radio" name="q16"><div><b>A. </b>人类不需要光线就能看见</div></label><label class="opt"><input type="radio" name="q16"><div><b>B. </b>人工智能并不理解物体的语义概念，它处理的是像素统计关系</div></label><label class="opt"><input type="radio" name="q16"><div><b>C. </b>人类无法分辨物体的颜色</div></label><label class="opt"><input type="radio" name="q16"><div><b>D. </b>人工智能识别速度永远比人类慢</div></label></div><div class="actions"><button>重做</button><button>解析/提示</button></div><div class="feedback"></div><div class="detail"><div><b>提示：</b>一个是基于理解和联想，另一个是基于庞大的数字运算。</div><div style="margin-top: 8px;"><b>解析：</b></div><div>• A：人类视觉系统也依赖于光信号，这并非本质区别。</div><div>• B：机器通过数学和概率学习模式，而人类能够结合常识、语境和情感去理解物体的本质。</div><div>• C：人类不仅能分辨颜色，而且对颜色的感知比目前的许多基础算法更复杂。</div><div>• D：在处理大规模密集数据（如几百万张照片）时，机器的速度远超人类。</div></div></div><div class="card hidden" data-qi="17"><div class="qhead"><div class="qno">第 18 题</div><div class="qmeta"><span class="badge">单选</span><span class="badge">4 选项</span></div><div class="qtext">“物体检测”任务与简单的“图像分类”任务相比，多做了哪件事？</div></div><div class="opts"><label class="opt"><input type="radio" name="q17"><div><b>A. </b>多识别了图片的颜色</div></label><label class="opt"><input type="radio" name="q17"><div><b>B. </b>在物体周围绘制了边界框并确定其位置</div></label><label class="opt"><input type="radio" name="q17"><div><b>C. </b>删除了图像中的背景像素</div></label><label class="opt"><input type="radio" name="q17"><div><b>D. </b>给物体起了个好听的名字</div></label></div><div class="actions"><button>重做</button><button>解析/提示</button></div><div class="feedback"></div><div class="detail"><div><b>提示：</b>它不仅要回答“这图里有车吗”，还要回答“车在哪”。</div><div style="margin-top: 8px;"><b>解析：</b></div><div>• A：颜色识别通常是两者共同的基础步骤。</div><div>• B：物体检测不仅要识别“是什么”，还要指出物体在图像中的具体空间位置。</div><div>• C：检测是标注位置，分割才更侧重于按像素剥离背景或隔离物体。</div><div>• D：名称（标签）在分类中就已存在，检测的核心增量在于位置信息。</div></div></div><div class="card hidden" data-qi="18"><div class="qhead"><div class="qno">第 19 题</div><div class="qmeta"><span class="badge">单选</span><span class="badge">4 选项</span></div><div class="qtext">在图像识别系统中，采用“降维”技术（如非线性降维）的主要好处是？</div></div><div class="opts"><label class="opt"><input type="radio" name="q18"><div><b>A. </b>让图片的尺寸变大</div></label><label class="opt"><input type="radio" name="q18"><div><b>B. </b>提高识别速率并发现数据的本质结构</div></label><label class="opt"><input type="radio" name="q18"><div><b>C. </b>增加模型学习的复杂程度</div></label><label class="opt"><input type="radio" name="q18"><div><b>D. </b>让电脑屏幕显示更多颜色</div></label></div><div class="actions"><button>重做</button><button>解析/提示</button></div><div class="feedback"></div><div class="detail"><div><b>提示：</b>想象一下把一张复杂的地图简化成几个关键的地标，找路是不是变快了？</div><div style="margin-top: 8px;"><b>解析：</b></div><div>• A：降维是减少数据的特征维度，通常不会改变物理上的图像尺寸。</div><div>• B：通过去除不重要的特征并压缩维度，可以降低计算复杂度并避免“维度灾难”。</div><div>• C：降维的初衷是简化计算，而非增加复杂度。</div><div>• D：降维是针对内部数学运算的优化，不直接改变显示器的物理性能。</div></div></div><div class="card hidden" data-qi="19"><div class="qhead"><div class="qno">第 20 题</div><div class="qmeta"><span class="badge">单选</span><span class="badge">4 选项</span></div><div class="qtext">如果一个自动驾驶系统把路上的塑料袋识别成了一块大石头而紧急刹车，这反映了图像识别的什么局限性？</div></div><div class="opts"><label class="opt"><input type="radio" name="q19"><div><b>A. </b>模型计算能力不足</div></label><label class="opt"><input type="radio" name="q19"><div><b>B. </b>由于视觉特征相似导致的误判及缺乏语义常识</div></label><label class="opt"><input type="radio" name="q19"><div><b>C. </b>汽车的摄像头像素不够高</div></label><label class="opt"><input type="radio" name="q19"><div><b>D. </b>塑料袋本身具有隐身功能</div></label></div><div class="actions"><button>重做</button><button>解析/提示</button></div><div class="feedback"></div><div class="detail"><div><b>提示：</b>机器可能只是觉得这两个东西长得很像，却没有人类那样的生活经验。</div><div style="margin-top: 8px;"><b>解析：</b></div><div>• A：能识别并动作说明计算力尚可，问题在于识别的准确性和语义理解。</div><div>• B：机器根据像素模式识别，若两者视觉特征在特定角度下接近，它可能无法通过物理常识（如塑料袋很轻）来纠错。</div><div>• C：即使像素很高，如果算法逻辑存在误判点，依然会出现此类问题。</div><div>• D：这不符合物理事实，问题核心在于AI对复杂环境的理解力限制。</div></div></div><div class="card hidden" data-qi="20"><div class="qhead"><div class="qno">第 21 题</div><div class="qmeta"><span class="badge">单选</span><span class="badge">4 选项</span></div><div class="qtext">在小学人工智能课堂上，通过使用颜色传感器探究盲盒里的水果，是为了模拟机器识别的哪个原理？</div></div><div class="opts"><label class="opt"><input type="radio" name="q20"><div><b>A. </b>大数据的收集过程</div></label><label class="opt"><input type="radio" name="q20"><div><b>B. </b>通过比对基本视觉特征（如颜色）进行识别</div></label><label class="opt"><input type="radio" name="q20"><div><b>C. </b>电脑病毒的传播方式</div></label><label class="opt"><input type="radio" name="q20"><div><b>D. </b>手机电池的充电过程</div></label></div><div class="actions"><button>重做</button><button>解析/提示</button></div><div class="feedback"></div><div class="detail"><div><b>提示：</b>想想它是怎么通过“颜色”这一个条件来猜水果的。</div><div style="margin-top: 8px;"><b>解析：</b></div><div>• A：这只是小规模的单一特征采集，不足以代表大数据收集。</div><div>• B：这引导学生理解机器是如何通过提取物体的具体物理参数来作为判断依据的。</div><div>• C：该实验与信息安全或病毒传播完全无关。</div><div>• D：这是物理能量转换范畴，与图像识别的逻辑探测无关。</div></div></div><div class="card hidden" data-qi="21"><div class="qhead"><div class="qno">第 22 题</div><div class="qmeta"><span class="badge">单选</span><span class="badge">4 选项</span></div><div class="qtext">神经网络中的“中间层”或“隐藏层”通常负责做什么？</div></div><div class="opts"><label class="opt"><input type="radio" name="q21"><div><b>A. </b>接收用户的语音指令</div></label><label class="opt"><input type="radio" name="q21"><div><b>B. </b>将简单的视觉元素组合成更复杂的形状和纹理</div></label><label class="opt"><input type="radio" name="q21"><div><b>C. </b>直接打印出识别结果</div></label><label class="opt"><input type="radio" name="q21"><div><b>D. </b>存储电脑里所有的视频文件</div></label></div><div class="actions"><button>重做</button><button>解析/提示</button></div><div class="feedback"></div><div class="detail"><div><b>提示：</b>就像积木拼搭，先有小零件，再拼成较大的组件。</div><div style="margin-top: 8px;"><b>解析：</b></div><div>• A：这是输入层或专门的音频模块的功能。</div><div>• B：层级结构使得模型能逐层构建对物体结构的理解，从边缘到形状再到物体。</div><div>• C：这是输出层或外部应用接口的任务。</div><div>• D：神经网络的层是数学计算节点，不是通用文件存储空间。</div></div></div><div class="card hidden" data-qi="22"><div class="qhead"><div class="qno">第 23 题</div><div class="qmeta"><span class="badge">单选</span><span class="badge">4 选项</span></div><div class="qtext">为什么数据质量往往比所谓的“炫酷算法”更重要？</div></div><div class="opts"><label class="opt"><input type="radio" name="q22"><div><b>A. </b>因为高质量数据比算法更贵</div></label><label class="opt"><input type="radio" name="q22"><div><b>B. </b>因为错误的或不平衡的数据会训练出带有缺陷或偏见的项目</div></label><label class="opt"><input type="radio" name="q22"><div><b>C. </b>因为算法根本不需要数据就能运行</div></label><label class="opt"><input type="radio" name="q22"><div><b>D. </b>因为数据可以让电脑耗电更少</div></label></div><div class="actions"><button>重做</button><button>解析/提示</button></div><div class="feedback"></div><div class="detail"><div><b>提示：</b>如果你给一个大厨提供发霉的食材，他也很难做出一道好菜。</div><div style="margin-top: 8px;"><b>解析：</b></div><div>• A：价格不是决定重要性的本质原因，核心在于对模型最终效果的贡献。</div><div>• B：即使算法再先进，如果喂给它的数据是不准确或有误导性的，最终的决策也会出错。</div><div>• C：现代图像识别系统本质上是数据驱动的，没有数据算法无法训练。</div><div>• D：耗电量与算法复杂度及硬件效率关系更紧密，与数据质量无直接因果关系。</div></div></div><div class="card hidden" data-qi="23"><div class="qhead"><div class="qno">第 24 题</div><div class="qmeta"><span class="badge">单选</span><span class="badge">4 选项</span></div><div class="qtext">在使用 Scratch 开发图像识别应用时，导入已训练好的模型是为了实现什么功能？</div></div><div class="opts"><label class="opt"><input type="radio" name="q23"><div><b>A. </b>让角色的移动速度变快</div></label><label class="opt"><input type="radio" name="q23"><div><b>B. </b>赋予程序判断摄像头图像含义的能力</div></label><label class="opt"><input type="radio" name="q23"><div><b>C. </b>自动给电脑安装最新的操作系统</div></label><label class="opt"><input type="radio" name="q23"><div><b>D. </b>把 Scratch 项目变成一个 3D 游戏</div></label></div><div class="actions"><button>重做</button><button>解析/提示</button></div><div class="feedback"></div><div class="detail"><div><b>提示：</b>没有这个模型，程序就认不出你是在做“左”还是“右”的手势。</div><div style="margin-top: 8px;"><b>解析：</b></div><div>• A：移动速度由 Scratch 脚本控制，模型仅提供识别出的控制信号（如方向）。</div><div>• B：模型中存储了训练好的识别逻辑，使程序能根据手势或物体产生相应的响应动作。</div><div>• C：AI 模型是针对特定任务的软件包，不具备系统维护功能。</div><div>• D：3D 效果取决于渲染引擎和图形设计，图像识别模型只负责视觉感知。</div></div></div><div class="card hidden" data-qi="24"><div class="qhead"><div class="qno">第 25 题</div><div class="qmeta"><span class="badge">单选</span><span class="badge">4 选项</span></div><div class="qtext">在人脸识别的五个步骤中，“特征提取”后的下一步通常是什么？</div></div><div class="opts"><label class="opt"><input type="radio" name="q24"><div><b>A. </b>人脸检测</div></label><label class="opt"><input type="radio" name="q24"><div><b>B. </b>对比识别（与数据库中的向量进行匹配）</div></label><label class="opt"><input type="radio" name="q24"><div><b>C. </b>清理镜头上的灰尘</div></label><label class="opt"><input type="radio" name="q24"><div><b>D. </b>把照片打印出来</div></label></div><div class="actions"><button>重做</button><button>解析/提示</button></div><div class="feedback"></div><div class="detail"><div><b>提示：</b>拿到了你的指纹信息后，警察下一步要去档案库里找谁的指纹和你的一样。</div><div style="margin-top: 8px;"><b>解析：</b></div><div>• A：检测是识别的第一步，用于定位人脸，此时已经在其后几个阶段了。</div><div>• B：提取到特征向量后，需要将其与数据库中存储的已知特征向量进行距离度量和比对。</div><div>• C：这是物理维护行为，不属于算法内部的逻辑步骤。</div><div>• D：打印不是识别流程的必要算法环节。</div></div></div><div class="card hidden" data-qi="25"><div class="qhead"><div class="qno">第 26 题</div><div class="qmeta"><span class="badge">单选</span><span class="badge">4 选项</span></div><div class="qtext">深度学习图像识别系统中的“反向传播”机制起到了什么作用？</div></div><div class="opts"><label class="opt"><input type="radio" name="q25"><div><b>A. </b>让图像从彩色变回黑白</div></label><label class="opt"><input type="radio" name="q25"><div><b>B. </b>根据预测误差不断调整模型内部的参数</div></label><label class="opt"><input type="radio" name="q25"><div><b>C. </b>将识别出的文字翻译成外语</div></label><label class="opt"><input type="radio" name="q25"><div><b>D. </b>加快摄像头捕捉画面的频率</div></label></div><div class="actions"><button>重做</button><button>解析/提示</button></div><div class="feedback"></div><div class="detail"><div><b>提示：</b>它通过“报错”并告诉前面的环节哪里该改进，来让机器慢慢变聪明。</div><div style="margin-top: 8px;"><b>解析：</b></div><div>• A：这是像素处理，反向传播是训练过程中的优化算法。</div><div>• B：它是实现学习的机制，沿着网络反向追踪误差并更新每一层的权重，使未来预测更准。</div><div>• C：翻译是自然语言处理的任务，反向传播是通用的模型训练手段。</div><div>• D：捕捉频率受硬件性能和底层驱动限制，与算法权重的训练更新无关。</div></div></div></div>
+
+  <footer class="page-footer">
+    <div class="page-footer__inner">
+      <p class="page-footer__title">继续探索这个作品</p>
+      <p class="page-footer__text">本页保留了原有答题逻辑，并补上了适合部署的页面跳转。你可以返回主体网页，或者继续挑战另一份测验。</p>
+      <div class="page-nav__links">
+        <a class="page-link" href="../../">返回主体网页</a>
+        <a class="page-link page-link--accent" href="../face-compliance/">人脸合规测验</a>
+      </div>
+    </div>
+  </footer>
+
+  <div class="overlay" id="overlay"></div>
+
+  <div class="side" id="side">
+    <div class="sideHead">
+      <div class="h">题目侧栏</div>
+      <div class="sp"></div>
+      <button id="closeSide">×</button>
+    </div>
+
+    <div class="tabRow">
+      <button class="tabBtn active" id="tabList">列表</button>
+      <button class="tabBtn" id="tabSettings">设置</button>
+    </div>
+
+    <div class="pane" id="paneList" style="display: block;">
+      <div class="small">点击序号跳题（单题：切换；滚动：滚动定位）</div>
+      <div class="hr"></div>
+      <div class="grid" id="grid"><button class="qbtn ok" data-qi="0" data-pos="0" title="题号 1">1</button><button class="qbtn ok active" data-qi="1" data-pos="1" title="题号 2">2</button><button class="qbtn" data-qi="2" data-pos="2" title="题号 3">3</button><button class="qbtn" data-qi="3" data-pos="3" title="题号 4">4</button><button class="qbtn" data-qi="4" data-pos="4" title="题号 5">5</button><button class="qbtn" data-qi="5" data-pos="5" title="题号 6">6</button><button class="qbtn" data-qi="6" data-pos="6" title="题号 7">7</button><button class="qbtn" data-qi="7" data-pos="7" title="题号 8">8</button><button class="qbtn" data-qi="8" data-pos="8" title="题号 9">9</button><button class="qbtn" data-qi="9" data-pos="9" title="题号 10">10</button><button class="qbtn" data-qi="10" data-pos="10" title="题号 11">11</button><button class="qbtn" data-qi="11" data-pos="11" title="题号 12">12</button><button class="qbtn" data-qi="12" data-pos="12" title="题号 13">13</button><button class="qbtn" data-qi="13" data-pos="13" title="题号 14">14</button><button class="qbtn" data-qi="14" data-pos="14" title="题号 15">15</button><button class="qbtn" data-qi="15" data-pos="15" title="题号 16">16</button><button class="qbtn" data-qi="16" data-pos="16" title="题号 17">17</button><button class="qbtn" data-qi="17" data-pos="17" title="题号 18">18</button><button class="qbtn" data-qi="18" data-pos="18" title="题号 19">19</button><button class="qbtn" data-qi="19" data-pos="19" title="题号 20">20</button><button class="qbtn" data-qi="20" data-pos="20" title="题号 21">21</button><button class="qbtn" data-qi="21" data-pos="21" title="题号 22">22</button><button class="qbtn" data-qi="22" data-pos="22" title="题号 23">23</button><button class="qbtn" data-qi="23" data-pos="23" title="题号 24">24</button><button class="qbtn" data-qi="24" data-pos="24" title="题号 25">25</button><button class="qbtn" data-qi="25" data-pos="25" title="题号 26">26</button></div>
+      <div class="hr"></div>
+      <div class="row">
+        <button id="prevBtn" class="pill">上一题</button>
+        <button id="nextQBtn" class="pill">下一题</button>
+      </div>
+      <div class="small" style="margin-top:10px">快捷键：<kbd>←</kbd>/<kbd>→</kbd>（单题） <kbd>L</kbd> 列表 <kbd>S</kbd> 设置 <kbd>M</kbd> 模式</div>
+    </div>
+
+    <div class="pane" id="paneSettings" style="display:none">
+      <div class="row">
+        <div class="lab">模式</div>
+        <select class="ctrl" id="modeSel">
+          <option value="single">单题翻页</option>
+          <option value="scroll">滚动多题</option>
+        </select>
+      </div>
+
+      <div class="row" style="margin-top:10px">
+        <div class="lab">解析显示</div>
+        <select class="ctrl" id="explainSel">
+          <option value="auto">自动（错题/手动）</option>
+          <option value="always">总是显示</option>
+          <option value="never">从不显示</option>
+        </select>
+      </div>
+
+      <div class="row" style="margin-top:10px">
+        <div class="lab">单选</div>
+        <label class="row" style="gap:8px">
+          <input id="autoCheck" type="checkbox">
+          <span class="small">点选自动判分</span>
+        </label>
+      </div>
+
+      <div class="row" style="margin-top:10px">
+        <div class="lab">筛选</div>
+        <select class="ctrl" id="filterSel">
+          <option value="all">全部</option>
+          <option value="todo">未做</option>
+          <option value="wrong">错题</option>
+        </select>
+      </div>
+
+      <div class="hr"></div>
+
+      <div class="row">
+        <button id="shuffleBtn" class="pill">打乱题序</button>
+        <button id="restoreBtn" class="pill">恢复顺序</button>
+      </div>
+
+      <div class="row" style="margin-top:10px">
+        <button id="resetAllBtn" class="pill">重置全部</button>
+      </div>
+
+      <div class="hr"></div>
+
+      <div class="small">提示：解析/提示按钮可单题展开；快捷键 <kbd>S</kbd> 直接开设置。</div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" style="display: none;">快捷键：L 列表 · S 设置 · M 模式 · 单题用 ←/→</div>
+
+  <script id="nlmq_data" type="application/json">{"meta":{"exportedAt":"2026-04-07T13:18:50.578Z","pageUrl":"","pageTitle":"图像识别知识测验","notebookId":"","captureUrl":"","quizTitle":"图像识别知识测验"},"quiz":[{"question":"在计算机中，一张数字图像最基本的组成单位是什么？","hint":"它通常被描述为构成数字画面微小格子的“点”。","answerOptions":[{"text":"像素","isCorrect":true,"rationale":"数字图像是由像素组成的网格，每个像素包含描述颜色和亮度的数值。"},{"text":"矢量图","isCorrect":false,"rationale":"矢量图是一种图像类型，而不是组成数字图像的基本数据点单位。"},{"text":"传感器","isCorrect":false,"rationale":"传感器是捕捉图像的硬件设备，而非数字图像本身的组成数据单位。"},{"text":"神经元","isCorrect":false,"rationale":"神经元是神经网络模型中的基本计算单元，不是构成原始图像文件的基本像素点。"}]},{"question":"对于人工智能模型来说，它看到的图像本质上是什么？","hint":"计算机是通过数学计算来处理所有信息的。","answerOptions":[{"text":"真实的风景或物体","isCorrect":false,"rationale":"机器并不理解现实世界中的宏观物体，它只能处理其底层表示形式。"},{"text":"庞大的数字矩阵","isCorrect":true,"rationale":"模型将像素信息转换为数值格式，通过数学矩阵来解读颜色和亮度的分布。"},{"text":"一种特定的声音信号","isCorrect":false,"rationale":"虽然声音也可以数字化，但图像识别处理的核心数据结构是针对视觉像素的。"},{"text":"带有情感的视觉记忆","isCorrect":false,"rationale":"人工智能目前尚不具备人类那样的情感理解，它基于统计关系学习模式。"}]},{"question":"在图像识别的预处理阶段，将图像调整为统一的分辨率是为了解决什么问题？","hint":"想想如果每个零件的大小都不一样，工厂的流水线还能正常工作吗？","answerOptions":[{"text":"消除图像中的偏见","isCorrect":false,"rationale":"偏见通常源于数据分布不均，而尺寸调整属于格式标准化操作。"},{"text":"确保模型输入的形状一致","isCorrect":true,"rationale":"模型通常需要固定大小的输入张量，以便进行后续的矩阵运算和特征提取。"},{"text":"增加图像的艺术感","isCorrect":false,"rationale":"预处理的目标是提高机器的可读性，而非从人类审美角度改善画质。"},{"text":"完全替换原有的像素值","isCorrect":false,"rationale":"尺寸调整是缩放原图信息，而不是丢弃原有视觉内容并用全新内容替换。"}]},{"question":"在图像处理中，“去噪”这一步骤的主要目的是什么？","hint":"当你在一张模糊或满是雪花点的照片中找人时，你会希望照片变清晰一点。","answerOptions":[{"text":"减少传感器噪声等视觉失真","isCorrect":true,"rationale":"去噪能清除干扰细节的像素杂质，使模型更容易检测到边缘和形状。"},{"text":"将彩色图像变成黑白图像","isCorrect":false,"rationale":"这是灰度化处理，去噪是针对图像中随机干扰点的清理。"},{"text":"给图像添加背景音乐","isCorrect":false,"rationale":"图像识别技术仅处理视觉信息，不涉及音频合成。"},{"text":"识别出图中所有人的名字","isCorrect":false,"rationale":"识别名字是推理层的任务，去噪属于更早期的准备工作阶段。"}]},{"question":"在机器识别图像的过程中，通常最先被识别出来的简单特征是什么？","hint":"想象一下画简笔画时，你动笔画下的第一根线条。","answerOptions":[{"text":"物体的完整轮廓","isCorrect":false,"rationale":"完整轮廓是由更基础的视觉元素在更深的层次组合而成的。"},{"text":"边缘、角点和颜色渐变","isCorrect":true,"rationale":"神经网络的早期层倾向于检测这些非常简单的局部模式。"},{"text":"物体的用途和分类","isCorrect":false,"rationale":"理解物体的语义含义是图像识别的最终结果，而不是初始阶段检测的内容。"},{"text":"图像拍摄的时间地点","isCorrect":false,"rationale":"这通常属于元数据信息，不属于通过像素分析得出的基本视觉特征。"}]},{"question":"卷积神经网络 (CNN) 中的“卷积”运算有什么核心作用？","hint":"即使一个边缘在图片的左边或右边，它依然是一个边缘。","answerOptions":[{"text":"让同一模式检测器可应用于整幅图像","isCorrect":true,"rationale":"卷积运算利用小型滤波器扫描图像，使模型能高效、稳健地学习可重用的视觉模式。"},{"text":"直接决定图像的最终标签","isCorrect":false,"rationale":"卷积仅负责提取特征，标签的分配通常由最后的分类层决定。"},{"text":"将图像的分辨率提高一倍","isCorrect":false,"rationale":"卷积通常会提取关键特征，有时甚至会通过步长设置降低特征图尺寸，而非提高原图分辨率。"},{"text":"删除图像中所有的红色像素","isCorrect":false,"rationale":"卷积是加权求和运算，用于提取特征，并非单纯的颜色过滤操作。"}]},{"question":"在机器学习中，所谓的“监督学习”主要依赖于什么？","hint":"就像学生做带有标准答案的习题集。","answerOptions":[{"text":"人类标记的带标签数据","isCorrect":true,"rationale":"监督学习通过展示大量已知正确答案的示例（如标记为“汽车”的图片）来教会模型。"},{"text":"机器随机生成的图像","isCorrect":false,"rationale":"随机数据缺乏正确的引导信息，无法作为有效的监督信号。"},{"text":"不包含任何答案的原始数据","isCorrect":false,"rationale":"没有正确答案的数据通常用于非监督学习，通过寻找相似性进行聚类。"},{"text":"硬件设备的运算速度","isCorrect":false,"rationale":"运算速度影响训练效率，但监督学习的本质在于学习“标签”与“特征”的对应关系。"}]},{"question":"非监督学习在图像识别中的一个典型应用场景是什么？","hint":"这种方式更像是让机器自己去发现数据中的内在规律，而不是给它答案。","answerOptions":[{"text":"根据相似性将不同形状的积木归类分组","isCorrect":true,"rationale":"非监督学习通过扫描特征寻找相似性进行聚类，无需预先知道每个组的名称。"},{"text":"精准识别出一张照片里是哪种水果","isCorrect":false,"rationale":"这需要明确的分类标签，属于典型的监督学习任务。"},{"text":"对违章车辆的车牌进行自动扣分","isCorrect":false,"rationale":"法律判断和精准识别需要高度确定的分类规则，主要依赖监督学习。"},{"text":"在人脸识别中匹配数据库中的特定用户","isCorrect":false,"rationale":"匹配已知身份属于分类或对比任务，通常涉及已有的身份标签。"}]},{"question":"在人脸识别技术中，“活体检测”步骤的主要目的是什么？","hint":"这是为了防止坏人拿一张你的照片来冒充你解锁手机。","answerOptions":[{"text":"识别出用户脸上是否有皱纹","isCorrect":false,"rationale":"识别细微特征属于图像分析，但活体检测关注的是身份的真实性来源。"},{"text":"验证是否为真实活体本人在操作","isCorrect":true,"rationale":"通过眨眼、摇头等动作判断操作者是真人，而非照片或视频翻拍，以防伪造攻击。"},{"text":"测量用户的心跳和血压","isCorrect":false,"rationale":"虽然某些特殊设备可以做到，但标准的人脸识别活体检测侧重于防欺骗。"},{"text":"计算用户照片的文件大小","isCorrect":false,"rationale":"文件大小是底层存储属性，与验证用户是否为真人没有直接逻辑关系。"}]},{"question":"图像识别模型中的“特征提取”是指什么过程？","hint":"就像人类通过“长脖子”和“斑点”来分辨长颈鹿一样。","answerOptions":[{"text":"把图像中所有多余的信息都删除","isCorrect":false,"rationale":"这说法过于绝对，特征提取是提取有用的关键信息，而非简单的全删除。"},{"text":"获取研究对象本身具有的代表性属性","isCorrect":true,"rationale":"它是通过分析像素，获得如颜色、形状、纹理等能将不同类别区分开的特征。"},{"text":"将一张图片拆分成几千张小碎片","isCorrect":false,"rationale":"这是物理分割，而特征提取是数学上的属性抽象过程。"},{"text":"提高图像的亮度使其更清晰","isCorrect":false,"rationale":"这属于预处理中的增强操作，特征提取是对增强后结果的更深层分析。"}]},{"question":"如果一个图像识别模型在训练集中表现极好，但在没见过的照片上表现很差，这通常意味着什么？","hint":"就像一个只会死记硬背的学生，遇到稍微变型的题目就不会做了。","answerOptions":[{"text":"该模型已经变得太聪明了","isCorrect":false,"rationale":"这通常是模型泛化能力不足的表现，而非智能水平的提升。"},{"text":"模型仅仅是记住了训练集而非学会了通用模式","isCorrect":true,"rationale":"这种现象称为过拟合，模型过度学习了特定样本的细节，无法应对新的变化。"},{"text":"电脑硬件需要更换显卡","isCorrect":false,"rationale":"性能下降通常源于算法训练策略或数据质量，而非单纯的硬件故障。"},{"text":"输入的测试照片分辨率太低","isCorrect":false,"rationale":"虽然分辨率有影响，但这种“反差”表现的核心问题在于模型的适应性不足。"}]},{"question":"在图像分类任务中，模型最终输出的是什么？","hint":"它通常会告诉你有 $95\\%$ 的可能性这是一只猫。","answerOptions":[{"text":"图像中物体的具体像素坐标","isCorrect":false,"rationale":"输出具体位置通常是目标检测的任务，分类只关注图像所属的类别。"},{"text":"一个属于某个类别的概率分布或标签","isCorrect":true,"rationale":"分类器根据提取的特征，判断图像最可能属于哪一个预定义的类别。"},{"text":"一段对图像内容的文字描述","isCorrect":false,"rationale":"这是图像描述 (Image Captioning) 的任务，简单的分类只输出特定的类别标签。"},{"text":"一张完全相同的备份图片","isCorrect":false,"rationale":"图像识别的目标是提取含义，而不是进行简单的文件复制。"}]},{"question":"为什么高质量的“标注数据”被认为是图像识别的基础？","hint":"如果没有老师告诉你什么是对的，你很难从错误的例子中学习。","answerOptions":[{"text":"因为它能让图片文件占用的空间变小","isCorrect":false,"rationale":"标注信息通常会增加额外的元数据开销，并不会减小图片体积。"},{"text":"因为它告诉模型应该从图像中学习什么","isCorrect":true,"rationale":"每个标签都是正确的参考信号，低质量的标注会导致模型学习到错误的统计关系。"},{"text":"因为它能自动修复拍摄时的抖动","isCorrect":false,"rationale":"修复抖动是预处理算法的功能，标注是提供监督信号的过程。"},{"text":"因为它能提高显卡的运算功率","isCorrect":false,"rationale":"标注数据影响的是算法的逻辑学习，而非硬件的物理功率。"}]},{"question":"“迁移学习”在图像识别开发中为什么非常流行？","hint":"这就像一个已经学会画画的人，学习画新的物体会比零基础的人快得多。","answerOptions":[{"text":"因为它不需要任何计算力","isCorrect":false,"rationale":"微调过程依然需要一定的计算资源，只是相比从零开始大大减少了。"},{"text":"可以利用已学到的通用视觉特征来加速新任务的学习","isCorrect":true,"rationale":"通过使用在大型数据集上训练好的预训练模型，可以在数据较少时也达到较好效果。"},{"text":"因为它可以让模型自动拥有情感","isCorrect":false,"rationale":"迁移学习传输的是视觉模式特征提取能力，不涉及情感等高级心理属性。"},{"text":"因为它可以跳过所有的预处理步骤","isCorrect":false,"rationale":"预训练模型通常对输入有特定的格式要求，预处理步骤依然必不可少。"}]},{"question":"图像识别中的“分类器设计”指的是什么？","hint":"这是制定一套让机器判断“它是谁”的逻辑标准。","answerOptions":[{"text":"选择性能最强的电脑主机","isCorrect":false,"rationale":"这属于硬件选型，而分类器设计是算法逻辑层面的构建。"},{"text":"通过训练得到一种识别规则","isCorrect":true,"rationale":"设计分类器是为了使系统能根据特征空间将对象划分到正确的类别中。"},{"text":"手动在每张图片上画圈标记","isCorrect":false,"rationale":"这属于人工标注或数据准备阶段，不是分类器本身的算法设计。"},{"text":"把彩色照片转换成黑白格式","isCorrect":false,"rationale":"这是预处理中的色域转换，与分类决策逻辑的设计无关。"}]},{"question":"在现实世界中，光照变化对图像识别模型会有什么影响？","hint":"想想你在全黑的房间里还能轻松认出你的朋友吗？机器也面临类似的困难。","answerOptions":[{"text":"完全没有任何影响","isCorrect":false,"rationale":"环境因素是现实世界中导致模型性能不稳定的主要原因之一。"},{"text":"可能会干扰像素值导致识别错误","isCorrect":true,"rationale":"光照会改变颜色的数值表示和对比度，如果模型不够鲁棒，会由于像素值的巨大波动而失效。"},{"text":"能让模型运行速度变快","isCorrect":false,"rationale":"运行速度由模型复杂度和硬件决定，外部光照不直接改变计算耗时。"},{"text":"会自动纠正错误的标签","isCorrect":false,"rationale":"标签是训练时固定的，光照只会作为输入噪声影响模型的推理判断。"}]},{"question":"人工智能图像识别与人类“看见”物体的本质区别在于？","hint":"一个是基于理解和联想，另一个是基于庞大的数字运算。","answerOptions":[{"text":"人类不需要光线就能看见","isCorrect":false,"rationale":"人类视觉系统也依赖于光信号，这并非本质区别。"},{"text":"人工智能并不理解物体的语义概念，它处理的是像素统计关系","isCorrect":true,"rationale":"机器通过数学和概率学习模式，而人类能够结合常识、语境和情感去理解物体的本质。"},{"text":"人类无法分辨物体的颜色","isCorrect":false,"rationale":"人类不仅能分辨颜色，而且对颜色的感知比目前的许多基础算法更复杂。"},{"text":"人工智能识别速度永远比人类慢","isCorrect":false,"rationale":"在处理大规模密集数据（如几百万张照片）时，机器的速度远超人类。"}]},{"question":"“物体检测”任务与简单的“图像分类”任务相比，多做了哪件事？","hint":"它不仅要回答“这图里有车吗”，还要回答“车在哪”。","answerOptions":[{"text":"多识别了图片的颜色","isCorrect":false,"rationale":"颜色识别通常是两者共同的基础步骤。"},{"text":"在物体周围绘制了边界框并确定其位置","isCorrect":true,"rationale":"物体检测不仅要识别“是什么”，还要指出物体在图像中的具体空间位置。"},{"text":"删除了图像中的背景像素","isCorrect":false,"rationale":"检测是标注位置，分割才更侧重于按像素剥离背景或隔离物体。"},{"text":"给物体起了个好听的名字","isCorrect":false,"rationale":"名称（标签）在分类中就已存在，检测的核心增量在于位置信息。"}]},{"question":"在图像识别系统中，采用“降维”技术（如非线性降维）的主要好处是？","hint":"想象一下把一张复杂的地图简化成几个关键的地标，找路是不是变快了？","answerOptions":[{"text":"让图片的尺寸变大","isCorrect":false,"rationale":"降维是减少数据的特征维度，通常不会改变物理上的图像尺寸。"},{"text":"提高识别速率并发现数据的本质结构","isCorrect":true,"rationale":"通过去除不重要的特征并压缩维度，可以降低计算复杂度并避免“维度灾难”。"},{"text":"增加模型学习的复杂程度","isCorrect":false,"rationale":"降维的初衷是简化计算，而非增加复杂度。"},{"text":"让电脑屏幕显示更多颜色","isCorrect":false,"rationale":"降维是针对内部数学运算的优化，不直接改变显示器的物理性能。"}]},{"question":"如果一个自动驾驶系统把路上的塑料袋识别成了一块大石头而紧急刹车，这反映了图像识别的什么局限性？","hint":"机器可能只是觉得这两个东西长得很像，却没有人类那样的生活经验。","answerOptions":[{"text":"模型计算能力不足","isCorrect":false,"rationale":"能识别并动作说明计算力尚可，问题在于识别的准确性和语义理解。"},{"text":"由于视觉特征相似导致的误判及缺乏语义常识","isCorrect":true,"rationale":"机器根据像素模式识别，若两者视觉特征在特定角度下接近，它可能无法通过物理常识（如塑料袋很轻）来纠错。"},{"text":"汽车的摄像头像素不够高","isCorrect":false,"rationale":"即使像素很高，如果算法逻辑存在误判点，依然会出现此类问题。"},{"text":"塑料袋本身具有隐身功能","isCorrect":false,"rationale":"这不符合物理事实，问题核心在于AI对复杂环境的理解力限制。"}]},{"question":"在小学人工智能课堂上，通过使用颜色传感器探究盲盒里的水果，是为了模拟机器识别的哪个原理？","hint":"想想它是怎么通过“颜色”这一个条件来猜水果的。","answerOptions":[{"text":"大数据的收集过程","isCorrect":false,"rationale":"这只是小规模的单一特征采集，不足以代表大数据收集。"},{"text":"通过比对基本视觉特征（如颜色）进行识别","isCorrect":true,"rationale":"这引导学生理解机器是如何通过提取物体的具体物理参数来作为判断依据的。"},{"text":"电脑病毒的传播方式","isCorrect":false,"rationale":"该实验与信息安全或病毒传播完全无关。"},{"text":"手机电池的充电过程","isCorrect":false,"rationale":"这是物理能量转换范畴，与图像识别的逻辑探测无关。"}]},{"question":"神经网络中的“中间层”或“隐藏层”通常负责做什么？","hint":"就像积木拼搭，先有小零件，再拼成较大的组件。","answerOptions":[{"text":"接收用户的语音指令","isCorrect":false,"rationale":"这是输入层或专门的音频模块的功能。"},{"text":"将简单的视觉元素组合成更复杂的形状和纹理","isCorrect":true,"rationale":"层级结构使得模型能逐层构建对物体结构的理解，从边缘到形状再到物体。"},{"text":"直接打印出识别结果","isCorrect":false,"rationale":"这是输出层或外部应用接口的任务。"},{"text":"存储电脑里所有的视频文件","isCorrect":false,"rationale":"神经网络的层是数学计算节点，不是通用文件存储空间。"}]},{"question":"为什么数据质量往往比所谓的“炫酷算法”更重要？","hint":"如果你给一个大厨提供发霉的食材，他也很难做出一道好菜。","answerOptions":[{"text":"因为高质量数据比算法更贵","isCorrect":false,"rationale":"价格不是决定重要性的本质原因，核心在于对模型最终效果的贡献。"},{"text":"因为错误的或不平衡的数据会训练出带有缺陷或偏见的项目","isCorrect":true,"rationale":"即使算法再先进，如果喂给它的数据是不准确或有误导性的，最终的决策也会出错。"},{"text":"因为算法根本不需要数据就能运行","isCorrect":false,"rationale":"现代图像识别系统本质上是数据驱动的，没有数据算法无法训练。"},{"text":"因为数据可以让电脑耗电更少","isCorrect":false,"rationale":"耗电量与算法复杂度及硬件效率关系更紧密，与数据质量无直接因果关系。"}]},{"question":"在使用 Scratch 开发图像识别应用时，导入已训练好的模型是为了实现什么功能？","hint":"没有这个模型，程序就认不出你是在做“左”还是“右”的手势。","answerOptions":[{"text":"让角色的移动速度变快","isCorrect":false,"rationale":"移动速度由 Scratch 脚本控制，模型仅提供识别出的控制信号（如方向）。"},{"text":"赋予程序判断摄像头图像含义的能力","isCorrect":true,"rationale":"模型中存储了训练好的识别逻辑，使程序能根据手势或物体产生相应的响应动作。"},{"text":"自动给电脑安装最新的操作系统","isCorrect":false,"rationale":"AI 模型是针对特定任务的软件包，不具备系统维护功能。"},{"text":"把 Scratch 项目变成一个 3D 游戏","isCorrect":false,"rationale":"3D 效果取决于渲染引擎和图形设计，图像识别模型只负责视觉感知。"}]},{"question":"在人脸识别的五个步骤中，“特征提取”后的下一步通常是什么？","hint":"拿到了你的指纹信息后，警察下一步要去档案库里找谁的指纹和你的一样。","answerOptions":[{"text":"人脸检测","isCorrect":false,"rationale":"检测是识别的第一步，用于定位人脸，此时已经在其后几个阶段了。"},{"text":"对比识别（与数据库中的向量进行匹配）","isCorrect":true,"rationale":"提取到特征向量后，需要将其与数据库中存储的已知特征向量进行距离度量和比对。"},{"text":"清理镜头上的灰尘","isCorrect":false,"rationale":"这是物理维护行为，不属于算法内部的逻辑步骤。"},{"text":"把照片打印出来","isCorrect":false,"rationale":"打印不是识别流程的必要算法环节。"}]},{"question":"深度学习图像识别系统中的“反向传播”机制起到了什么作用？","hint":"它通过“报错”并告诉前面的环节哪里该改进，来让机器慢慢变聪明。","answerOptions":[{"text":"让图像从彩色变回黑白","isCorrect":false,"rationale":"这是像素处理，反向传播是训练过程中的优化算法。"},{"text":"根据预测误差不断调整模型内部的参数","isCorrect":true,"rationale":"它是实现学习的机制，沿着网络反向追踪误差并更新每一层的权重，使未来预测更准。"},{"text":"将识别出的文字翻译成外语","isCorrect":false,"rationale":"翻译是自然语言处理的任务，反向传播是通用的模型训练手段。"},{"text":"加快摄像头捕捉画面的频率","isCorrect":false,"rationale":"捕捉频率受硬件性能和底层驱动限制，与算法权重的训练更新无关。"}]}],"config":{"mode":"single","explain":"auto","autoCheckSingle":true},"generator":{"name":"NotebookLM Quiz Exporter Pro","version":"1.4.1"}}</script>
+  <script>
+const DATA = JSON.parse(document.getElementById("nlmq_data").textContent);
+const quiz = Array.isArray(DATA.quiz) ? DATA.quiz : [];
+const cfg = DATA.config || {};
+const meta = DATA.meta || {};
+const $ = (sel, root=document) => root.querySelector(sel);
+const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+const letter = (i)=>String.fromCharCode(65+i);
+
+const settings = {
+  mode: cfg.mode === "scroll" ? "scroll" : "single",
+  explain: cfg.explain === "always" || cfg.explain === "never" ? cfg.explain : "auto",
+  autoCheckSingle: !!cfg.autoCheckSingle,
+  filter: "all",
+  order: quiz.map((_, i)=>i),
+  currentPos: 0,
+  sideTab: "list"
+};
+
+const qState = quiz.map(()=>({ checked:false, correct:false, selected:[], shownDetail:false }));
+
+function toast(msg){
+  const t = $("#toast");
+  t.textContent = msg;
+  t.style.display = "block";
+  clearTimeout(t._t);
+  t._t = setTimeout(()=> t.style.display="none", 1600);
+}
+
+function correctIdxs(q){
+  const opts = Array.isArray(q.answerOptions) ? q.answerOptions : [];
+  return opts.map((o,i)=>o && o.isCorrect ? i : -1).filter(i=>i>=0);
+}
+
+function computeStats(){
+  const checked = qState.filter(s=>s.checked).length;
+  const correct = qState.filter(s=>s.checked && s.correct).length;
+  return { total: quiz.length, checked, correct };
+}
+
+function updateTop(){
+  const { total, checked, correct } = computeStats();
+  $("#stat").textContent = "已判分 " + checked + "/" + total + " · 正确 " + correct;
+  const pct = total ? Math.round((checked/total)*100) : 0;
+  $("#bar").style.width = pct + "%";
+  $("#modeBtn").textContent = settings.mode === "single" ? "单题" : "滚动";
+}
+
+function applyFilterToCards(){
+  if (settings.mode !== "scroll") return;
+  const filter = settings.filter;
+  $$(".card").forEach(card=>{
+    const qi = parseInt(card.getAttribute("data-qi"), 10);
+    const st = qState[qi];
+    let show = true;
+    if (filter === "todo") show = !st.checked;
+    else if (filter === "wrong") show = st.checked && !st.correct;
+    card.classList.toggle("hidden", !show);
+  });
+}
+
+function activeQi(){
+  return settings.order[settings.currentPos] ?? 0;
+}
+
+function topOffset(){
+  const top = document.querySelector(".top");
+  const h = top ? top.offsetHeight : 0;
+  return Math.max(0, h + 10);
+}
+
+function scrollToCard(card){
+  const r = card.getBoundingClientRect();
+  const y = window.scrollY + r.top - topOffset();
+  window.scrollTo({ top: Math.max(0, y), behavior: "smooth" });
+}
+
+function showPos(pos){
+  const max = settings.order.length;
+  settings.currentPos = Math.max(0, Math.min(max-1, pos));
+  const qi = activeQi();
+
+  if (settings.mode === "single") {
+    $$(".card").forEach(c=>{
+      const cqi = parseInt(c.getAttribute("data-qi"), 10);
+      c.classList.toggle("hidden", cqi !== qi);
+    });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  } else {
+    const card = document.querySelector('.card[data-qi="'+qi+'"]');
+    if (card) scrollToCard(card);
+  }
+
+  updateSideActive(qi);
+}
+
+function next(delta){
+  showPos(settings.currentPos + delta);
+}
+
+function nextTodo(){
+  for (let p=0;p<settings.order.length;p++){
+    const qi = settings.order[p];
+    if (!qState[qi].checked){
+      showPos(p);
+      toast("跳到下一未做");
+      return;
+    }
+  }
+  toast("已全部判分");
+}
+
+function setMode(m){
+  settings.mode = (m === "scroll") ? "scroll" : "single";
+  if (settings.mode === "scroll") {
+    $$(".card").forEach(c=>c.classList.remove("hidden"));
+    applyFilterToCards();
+    toast("切换：滚动多题");
+  } else {
+    showPos(settings.currentPos);
+    toast("切换：单题翻页");
+  }
+  updateTop();
+}
+
+function setExplainMode(m){
+  settings.explain = (m === "always" || m === "never") ? m : "auto";
+  $$(".card").forEach(card=>{
+    const qi = parseInt(card.getAttribute("data-qi"), 10);
+    applyDetailPolicy(qi);
+  });
+  toast("解析显示：" + (settings.explain === "always" ? "总是" : settings.explain === "never" ? "从不" : "自动"));
+}
+
+function applyDetailPolicy(qi){
+  const card = document.querySelector('.card[data-qi="'+qi+'"]');
+  if (!card) return;
+  const det = card.querySelector(".detail");
+  const st = qState[qi];
+  if (settings.explain === "never") det.classList.remove("show");
+  else if (settings.explain === "always") det.classList.add("show");
+  else {
+    const show = st.shownDetail || (st.checked && !st.correct);
+    det.classList.toggle("show", !!show);
+  }
+}
+
+function setAutoCheckSingle(on){
+  settings.autoCheckSingle = !!on;
+  toast("单选自动判分：" + (settings.autoCheckSingle ? "开" : "关"));
+}
+
+function selectedIdxs(qi){
+  const card = document.querySelector('.card[data-qi="'+qi+'"]');
+  if (!card) return [];
+  const inputs = Array.from(card.querySelectorAll('input[name="q'+qi+'"]'));
+  const sel = [];
+  inputs.forEach((inp, i)=>{ if (inp.checked) sel.push(i); });
+  return sel;
+}
+
+function setDisabled(qi, disabled){
+  const card = document.querySelector('.card[data-qi="'+qi+'"]');
+  if (!card) return;
+  Array.from(card.querySelectorAll('input[name="q'+qi+'"]')).forEach(inp=> inp.disabled = disabled);
+}
+
+function clearMarks(qi){
+  const card = document.querySelector('.card[data-qi="'+qi+'"]');
+  if (!card) return;
+  card.querySelectorAll(".opt").forEach(o=> o.classList.remove("correct","wrong"));
+  const fb = card.querySelector(".feedback");
+  fb.className = "feedback";
+  fb.textContent = "";
+}
+
+function mark(qi, ok, corr){
+  const card = document.querySelector('.card[data-qi="'+qi+'"]');
+  if (!card) return;
+  const opts = Array.from(card.querySelectorAll(".opt"));
+  opts.forEach((el, i)=>{ if (corr.includes(i)) el.classList.add("correct"); });
+  qState[qi].selected.forEach(i=>{ if (!corr.includes(i)) opts[i]?.classList.add("wrong"); });
+
+  const fb = card.querySelector(".feedback");
+  fb.classList.add(ok ? "good" : "bad");
+  const corrLetters = corr.length ? corr.map(letter).join(", ") : "（未标注）";
+  fb.textContent = ok ? "✅ 正确" : ("❌ 错误（正确答案：" + corrLetters + "）");
+}
+
+function evaluate(qi){
+  const q = quiz[qi];
+  const corr = correctIdxs(q);
+  const sel = selectedIdxs(qi);
+  qState[qi].selected = sel;
+
+  clearMarks(qi);
+
+  const card = document.querySelector('.card[data-qi="'+qi+'"]');
+  if (!card) return;
+
+  if (!corr.length) {
+    const fb = card.querySelector(".feedback");
+    fb.classList.add("bad");
+    fb.textContent = "⚠️ 该题未标注答案，无法判分";
+    qState[qi].checked = true;
+    qState[qi].correct = false;
+    updateTop(); updateSideItem(qi); applyDetailPolicy(qi);
+    return;
+  }
+
+  if (!sel.length) {
+    toast("请先选择一个选项");
+    return;
+  }
+
+  const ok = sel.length === corr.length && sel.every(i=>corr.includes(i));
+  qState[qi].checked = true;
+  qState[qi].correct = ok;
+  if (!ok && settings.explain !== "never") qState[qi].shownDetail = true;
+
+  mark(qi, ok, corr);
+  setDisabled(qi, true);
+
+  applyDetailPolicy(qi);
+  updateTop();
+  updateSideItem(qi);
+  if (settings.mode === "single") updateSideActive(qi);
+}
+
+function resetOne(qi){
+  const card = document.querySelector('.card[data-qi="'+qi+'"]');
+  if (!card) return;
+  Array.from(card.querySelectorAll('input[name="q'+qi+'"]')).forEach(inp=>{ inp.checked=false; inp.disabled=false; });
+  qState[qi] = { checked:false, correct:false, selected:[], shownDetail:false };
+  clearMarks(qi);
+  applyDetailPolicy(qi);
+  updateTop();
+  updateSideItem(qi);
+}
+
+function resetAll(){
+  quiz.forEach((_, qi)=> resetOne(qi));
+  toast("已重置全部题目");
+}
+
+function toggleDetail(qi){
+  const card = document.querySelector('.card[data-qi="'+qi+'"]');
+  if (!card) return;
+  const det = card.querySelector(".detail");
+  const willShow = !det.classList.contains("show");
+  if (settings.explain === "never" && willShow) {
+    settings.explain = "auto";
+    $("#explainSel").value = "auto";
+  }
+  qState[qi].shownDetail = willShow;
+  applyDetailPolicy(qi);
+}
+
+function syncSelectedClass(card, qi){
+  const labels = Array.from(card.querySelectorAll(".opt"));
+  const inputs = Array.from(card.querySelectorAll('input[name="q'+qi+'"]'));
+  labels.forEach((lab, i)=>{
+    const on = !!inputs[i]?.checked;
+    lab.classList.toggle("selected", on);
+  });
+}
+
+function buildCard(qi){
+  const q = quiz[qi];
+  const corr = correctIdxs(q);
+  const multi = corr.length > 1;
+  const type = multi ? "checkbox" : "radio";
+
+  const card = document.createElement("div");
+  card.className = "card";
+  card.setAttribute("data-qi", String(qi));
+
+  const head = document.createElement("div");
+  head.className = "qhead";
+
+  const left = document.createElement("div");
+  left.className = "qno";
+  left.textContent = "第 " + (qi+1) + " 题";
+
+  const metaRow = document.createElement("div");
+  metaRow.className = "qmeta";
+  const badgeType = document.createElement("span");
+  badgeType.className = "badge";
+  badgeType.textContent = multi ? "多选" : "单选";
+  const badgeCnt = document.createElement("span");
+  badgeCnt.className = "badge";
+  badgeCnt.textContent = (Array.isArray(q.answerOptions) ? q.answerOptions.length : 0) + " 选项";
+  metaRow.appendChild(badgeType);
+  metaRow.appendChild(badgeCnt);
+
+  const qt = document.createElement("div");
+  qt.className = "qtext";
+  qt.textContent = q.question || "";
+
+  head.appendChild(left);
+  head.appendChild(metaRow);
+  head.appendChild(qt);
+  card.appendChild(head);
+
+  const optsWrap = document.createElement("div");
+  optsWrap.className = "opts";
+
+  const opts = Array.isArray(q.answerOptions) ? q.answerOptions : [];
+  opts.forEach((o, oi)=>{
+    const lab = document.createElement("label");
+    lab.className = "opt";
+
+    const inp = document.createElement("input");
+    inp.type = type;
+    inp.name = "q" + qi;
+
+    const txt = document.createElement("div");
+    const b = document.createElement("b");
+    b.textContent = letter(oi) + ". ";
+    txt.appendChild(b);
+    txt.appendChild(document.createTextNode(o?.text || ""));
+
+    lab.appendChild(inp);
+    lab.appendChild(txt);
+    optsWrap.appendChild(lab);
+
+    inp.addEventListener("change", ()=>{
+      syncSelectedClass(card, qi);
+      if (!multi && settings.autoCheckSingle && !qState[qi].checked) evaluate(qi);
+    });
+  });
+
+  card.appendChild(optsWrap);
+
+  const actions = document.createElement("div");
+  actions.className = "actions";
+
+  if (!(settings.mode === "single" && !multi)) {
+    const btnCheck = document.createElement("button");
+    btnCheck.textContent = multi ? "提交" : "检查";
+    btnCheck.addEventListener("click", ()=> evaluate(qi));
+    actions.appendChild(btnCheck);
+  }
+
+  const btnReset = document.createElement("button");
+  btnReset.textContent = "重做";
+  btnReset.addEventListener("click", ()=> resetOne(qi));
+
+  const btnDetail = document.createElement("button");
+  btnDetail.textContent = "解析/提示";
+  btnDetail.addEventListener("click", ()=> toggleDetail(qi));
+
+  actions.appendChild(btnReset);
+  actions.appendChild(btnDetail);
+  card.appendChild(actions);
+
+  const fb = document.createElement("div");
+  fb.className = "feedback";
+  card.appendChild(fb);
+
+  const det = document.createElement("div");
+  det.className = "detail";
+
+  const hasHint = !!q.hint;
+  const anyR = opts.some(x=>x?.rationale);
+
+  if (hasHint) {
+    const h = document.createElement("div");
+    const hb = document.createElement("b");
+    hb.textContent = "提示：";
+    h.appendChild(hb);
+    h.appendChild(document.createTextNode(q.hint));
+    det.appendChild(h);
+  }
+
+  if (anyR) {
+    const t = document.createElement("div");
+    t.style.marginTop = "8px";
+    const tb = document.createElement("b");
+    tb.textContent = "解析：";
+    t.appendChild(tb);
+    det.appendChild(t);
+
+    opts.forEach((o, oi)=>{
+      if (!o?.rationale) return;
+      const r = document.createElement("div");
+      r.textContent = "• " + letter(oi) + "：" + o.rationale;
+      det.appendChild(r);
+    });
+  }
+
+  if (!hasHint && !anyR) {
+    const none = document.createElement("div");
+    none.textContent = "（本题无提示/解析）";
+    det.appendChild(none);
+  }
+
+  card.appendChild(det);
+
+  const st = qState[qi];
+  if (st.checked) {
+    Array.from(card.querySelectorAll('input[name="q'+qi+'"]')).forEach((inp, i)=>{
+      inp.checked = st.selected.includes(i);
+      inp.disabled = true;
+    });
+    syncSelectedClass(card, qi);
+    clearMarks(qi);
+    mark(qi, st.correct, corr);
+  } else {
+    syncSelectedClass(card, qi);
+  }
+
+  applyDetailPolicy(qi);
+  return card;
+}
+
+function buildMain(){
+  const main = $("#main");
+  main.innerHTML = "";
+  settings.order.forEach(qi=> main.appendChild(buildCard(qi)));
+  if (settings.mode === "single") showPos(settings.currentPos);
+  else applyFilterToCards();
+  updateSideGrid();
+  updateTop();
+}
+
+function updateSideItem(qi){
+  const btn = document.querySelector('.qbtn[data-qi="'+qi+'"]');
+  if (!btn) return;
+  btn.classList.remove("todo","ok","bad");
+  const st = qState[qi];
+  if (!st.checked) btn.classList.add("todo");
+  else if (st.correct) btn.classList.add("ok");
+  else btn.classList.add("bad");
+}
+
+function updateSideGrid(){
+  const grid = $("#grid");
+  grid.innerHTML = "";
+  settings.order.forEach((qi, pos)=>{
+    const b = document.createElement("button");
+    b.className = "qbtn";
+    b.setAttribute("data-qi", String(qi));
+    b.setAttribute("data-pos", String(pos));
+    b.textContent = String(pos+1);
+    b.title = "题号 " + (qi+1);
+
+    updateSideItem(qi);
+
+    b.addEventListener("click", ()=>{
+      settings.currentPos = pos;
+      showPos(pos);
+      closeSide();
+    });
+
+    grid.appendChild(b);
+  });
+  updateSideActive(activeQi());
+}
+
+function updateSideActive(qi){
+  $$(".qbtn").forEach(b=> b.classList.remove("active"));
+  const btn = document.querySelector('.qbtn[data-qi="'+qi+'"]');
+  if (btn) btn.classList.add("active");
+}
+
+function openSide(tab){
+  if (tab === "settings" || tab === "list") settings.sideTab = tab;
+  $("#overlay").classList.add("show");
+  $("#side").classList.add("open");
+  setSideTab(settings.sideTab);
+}
+
+function closeSide(){
+  $("#overlay").classList.remove("show");
+  $("#side").classList.remove("open");
+}
+
+function setSideTab(tab){
+  settings.sideTab = tab === "settings" ? "settings" : "list";
+  $("#tabList").classList.toggle("active", settings.sideTab === "list");
+  $("#tabSettings").classList.toggle("active", settings.sideTab === "settings");
+  $("#paneList").style.display = settings.sideTab === "list" ? "block" : "none";
+  $("#paneSettings").style.display = settings.sideTab === "settings" ? "block" : "none";
+}
+
+function shuffleOrder(){
+  const arr = quiz.map((_, i)=>i);
+  for (let i=arr.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  settings.order = arr;
+  settings.currentPos = 0;
+  buildMain();
+  toast("已打乱题序");
+}
+
+function restoreOrder(){
+  settings.order = quiz.map((_, i)=>i);
+  settings.currentPos = 0;
+  buildMain();
+  toast("已恢复原始题序");
+}
+
+function init(){
+  const title = meta.quizTitle || meta.pageTitle || "Quiz";
+  const subtitle = "从像素、特征到分类器，边做题边复习图像识别基础。";
+  $("#titleT").textContent = title;
+  $("#titleS").textContent = subtitle;
+
+  $("#modeBtn").addEventListener("click", ()=> setMode(settings.mode === "single" ? "scroll" : "single"));
+  $("#sideBtn").addEventListener("click", ()=> openSide("list"));
+  $("#nextBtn").addEventListener("click", ()=> nextTodo());
+  $("#prevBtn").addEventListener("click", ()=> next(-1));
+  $("#nextQBtn").addEventListener("click", ()=> next(1));
+
+  $("#overlay").addEventListener("click", closeSide);
+  $("#closeSide").addEventListener("click", closeSide);
+
+  $("#tabList").addEventListener("click", ()=> setSideTab("list"));
+  $("#tabSettings").addEventListener("click", ()=> setSideTab("settings"));
+
+  $("#modeSel").value = settings.mode;
+  $("#modeSel").addEventListener("change", (e)=> setMode(e.target.value));
+
+  $("#explainSel").value = settings.explain;
+  $("#explainSel").addEventListener("change", (e)=> setExplainMode(e.target.value));
+
+  $("#autoCheck").checked = settings.autoCheckSingle;
+  $("#autoCheck").addEventListener("change", (e)=> setAutoCheckSingle(e.target.checked));
+
+  $("#filterSel").value = settings.filter;
+  $("#filterSel").addEventListener("change", (e)=>{
+    settings.filter = e.target.value || "all";
+    applyFilterToCards();
+    toast("筛选：" + (settings.filter === "all" ? "全部" : settings.filter === "todo" ? "未做" : "错题"));
+  });
+
+  $("#shuffleBtn").addEventListener("click", shuffleOrder);
+  $("#restoreBtn").addEventListener("click", restoreOrder);
+  $("#resetAllBtn").addEventListener("click", resetAll);
+
+  document.addEventListener("keydown", (e)=>{
+    if (e.key === "Escape") closeSide();
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+
+    const tag = (e.target && e.target.tagName) ? e.target.tagName.toLowerCase() : "";
+    const inInput = tag === "input" || tag === "textarea" || tag === "select";
+
+    if (!inInput && e.key.toLowerCase() === "l") openSide("list");
+    if (!inInput && e.key.toLowerCase() === "s") openSide("settings");
+    if (!inInput && e.key.toLowerCase() === "m") setMode(settings.mode === "single" ? "scroll" : "single");
+
+    if (settings.mode === "single" && !inInput) {
+      if (e.key === "ArrowLeft") next(-1);
+      if (e.key === "ArrowRight") next(1);
+      if (e.key.toLowerCase() === "n") next(1);
+      if (e.key.toLowerCase() === "p") next(-1);
+    }
+  });
+
+  buildMain();
+  updateTop();
+  toast("快捷键：L 列表 · S 设置 · M 模式 · 单题用 ←/→");
+}
+
+init();
+</script>
+
+</body></html>
+
