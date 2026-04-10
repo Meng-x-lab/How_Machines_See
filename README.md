@@ -13,8 +13,8 @@
 三个页面已经互相连通，可以从首页进入两个测验页，也可以在两个测验页之间互相跳转并返回主体页。
 
 ## 网页预览
-- https://toseem.de5.net/
-- https://how-machines-see.vercel.app
+- 国内直连 https://toseem.de5.net/
+- 海外直连 https://how-machines-see.vercel.app
 
 ## 项目结构
 
