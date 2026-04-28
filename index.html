@@ -88,15 +88,15 @@
             <div class="text-xl md:text-2xl font-bold text-orange-500 flex items-center gap-2">
                 🤖 <span>机器识图乐园</span>
             </div>
-            <div class="flex items-center gap-1 md:gap-2 text-xl md:text-2xl" id="global-stars">
-                <!-- 增加到 7 颗星，最后一颗留给彩蛋 -->
+                        <div class="flex items-center gap-1 md:gap-2 text-xl md:text-2xl" id="global-stars">
                 <span class="star-slot" id="star-1">⭐</span>
                 <span class="star-slot" id="star-2">⭐</span>
                 <span class="star-slot" id="star-3">⭐</span>
                 <span class="star-slot" id="star-4">⭐</span>
                 <span class="star-slot" id="star-5">⭐</span>
                 <span class="star-slot" id="star-6">⭐</span>
-                <span class="star-slot" id="star-7">🌟</span>
+                <span class="star-slot" id="star-7">⭐</span>
+                <span class="star-slot" id="star-8">🌟</span>
             </div>
         </div>
     </nav>
@@ -403,9 +403,77 @@
             </div>
             
             <!-- 彩蛋通关提示 -->
-            <div id="cam-success-badge" class="absolute top-10 right-10 transform rotate-12 hidden z-20">
+                        <div id="cam-success-badge" class="absolute top-10 right-10 transform rotate-12 hidden z-20">
                 <div class="bg-yellow-400 text-red-600 font-bold px-4 py-2 rounded-lg shadow-xl border-2 border-yellow-200 text-xl animate-bounce">
                     🎉 彩蛋解锁成功！
+                </div>
+            </div>
+
+            <div id="cam-next-step" class="hidden mt-8 text-center">
+                <a href="#bead-section" class="page-link page-link--mint inline-flex">继续去拼豆创作工坊</a>
+            </div>
+        </div>
+
+        <div id="bead-section" class="bead-workshop cute-card p-6 md:p-10 relative overflow-hidden">
+            <div class="bead-workshop__top">
+                <div>
+                    <span class="bead-workshop__eyebrow">🧡 终章互动 8</span>
+                    <h2 class="bead-workshop__title">拼豆创作工坊：把图像变成小像素</h2>
+                    <p class="bead-workshop__text">你已经知道机器会把图像拆成颜色和小方块啦！现在就挑选喜欢的颜色，用圆圆的小拼豆自由拼出自己的想法，做一幅温暖又有趣的小作品吧。</p>
+                </div>
+                <div class="bead-workshop__eyebrow">🎨 自由拼豆模式</div>
+            </div>
+
+            <div class="bead-workshop__layout">
+                <div class="bead-workshop__sidebar">
+                    <div class="bead-panel" id="bead-draw-controls">
+                        <h3>手动拼豆工具</h3>
+                        <p>先选颜色，再用画笔或橡皮在拼豆板上拖一拖，就能摆出自己的像素小作品。</p>
+                        <div class="bead-tool-row mt-4" id="bead-tool-buttons">
+                            <button type="button" class="bead-pill-btn is-active" data-bead-tool="brush">🖍️ 画笔</button>
+                            <button type="button" class="bead-pill-btn" data-bead-tool="eraser">🧽 橡皮</button>
+                            <button type="button" class="bead-pill-btn bead-pill-btn--warm" id="bead-clear-btn">🧹 清空</button>
+                        </div>
+                        <div class="mt-4">
+                            <h3>拼豆板尺寸</h3>
+                            <div class="bead-size-row" id="bead-size-buttons"></div>
+                        </div>
+                    </div>
+
+<div class="bead-panel">
+                        <h3>颜色小篮子</h3>
+                        <div class="bead-color-grid mt-4" id="bead-color-palette"></div>
+                    </div>
+
+                    <div class="bead-panel bead-status">
+                        <span class="bead-status__icon">💡</span>
+                        <p class="bead-status__text"><strong>小牧提示：</strong><span id="bead-status-text">挑一个喜欢的颜色，在圆圆的小拼豆上自由创作吧。</span></p>
+                    </div>
+                </div>
+
+                <div class="bead-workshop__board-area">
+                    <div class="bead-board-frame">
+                        <div class="bead-board-scroll">
+                            <div class="bead-board" id="bead-board" aria-label="拼豆创作画板"></div>
+                        </div>
+                    </div>
+                    <div class="bead-board-meta">
+                        <span>当前拼豆板：<strong id="bead-board-size">16 × 16</strong></span>
+                        <span>已经放上：<strong id="bead-filled-count">0 颗拼豆</strong></span>
+                    </div>
+                    <button type="button" class="bead-complete-btn" id="bead-complete-btn" disabled>完成拼豆作品</button>
+                </div>
+            </div>
+
+            <div id="bead-finale" class="bead-finale hidden">
+                <div class="bead-finale__panel">
+                    <div class="bead-finale__emoji">🎉</div>
+                    <h3>拼豆终章完成啦！</h3>
+                    <p>你已经把“机器眼中的颜色格”变成了自己的小作品。现在带着这份观察力，继续去完成后面的知识测验吧！</p>
+                    <div class="bead-finale__actions">
+                        <button type="button" class="page-link" id="bead-close-finale">回到作品</button>
+                        <a class="page-link page-link--primary" href="#more-challenges-title">前往知识测验</a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -446,6 +514,8 @@
             </div>
         </div>
     </footer>
+
+    <script src="./assets/js/bead-workshop.js"></script>
 
     <!-- JS 核心逻辑 -->
     <script>
@@ -495,7 +565,7 @@
         let stars = 0;
         function gainStar() {
             stars++;
-            if(stars <= 7) document.getElementById(`star-${stars}`).classList.add('star-active');
+            if(stars <= 8) document.getElementById(`star-${stars}`).classList.add('star-active');
         }
 
         // ================= 各游戏逻辑缩略 =================
@@ -656,6 +726,7 @@
                     hasEarnedCamStar = true;
                     gainStar();
                     document.getElementById('cam-success-badge').classList.remove('hidden');
+                    document.getElementById('cam-next-step').classList.remove('hidden');
                 }
             });
         });
@@ -834,7 +905,28 @@
             // 将 offCanvas 覆盖画到主画布
             ctx.drawImage(offCanvas, 0, 0, procW, procH, 0, 0, w, h);
         }
-
+        if (window.initBeadWorkshop) {
+            window.initBeadWorkshop({
+                sectionId: 'bead-section',
+                boardPresets: [16, 24],
+                palette: [
+                    { name: '晴空蓝', hex: '#60A5FA' },
+                    { name: '柠檬黄', hex: '#FACC15' },
+                    { name: '胡萝卜橙', hex: '#FB923C' },
+                    { name: '草地绿', hex: '#4ADE80' },
+                    { name: '樱桃红', hex: '#F87171' },
+                    { name: '棉花糖粉', hex: '#F9A8D4' },
+                    { name: '葡萄紫', hex: '#C084FC' },
+                    { name: '薄荷青', hex: '#5EEAD4' },
+                    { name: '巧克力棕', hex: '#8B6B4F' },
+                    { name: '奶油白', hex: '#FFF7D6' },
+                    { name: '夜空灰', hex: '#4B5563' },
+                    { name: '桃子粉', hex: '#FDBA74' }
+                ],
+                gainStar: window.gainStar,
+                onComplete: function () {}
+            });
+        }
     </script>
 
 </body></html>
